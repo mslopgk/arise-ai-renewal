@@ -1712,7 +1712,7 @@
         </div>
         <div class="mast-right">
           <span class="mast-meta">2026학년도 2학기</span>
-          <button type="button" class="apply" data-apply>지원 희망 제출 <span class="a">→</span></button>
+          <button type="button" class="apply" data-apply>희망 전공 담기 및 알람신청 <span class="a">→</span></button>
         </div>
       </div>
       <div class="dateline">
@@ -1730,10 +1730,10 @@
   <div class="wrap wrap-hero">
     <section class="hero">
       <div class="hero-main">
-        <div class="kicker rise d2">학·석사 연계 특별 트랙</div>
+        <div class="kicker rise d2" aria-hidden="true" style="visibility:hidden">학·석사 연계 특별 트랙</div>
         <h1 class="rise d2">석사·박사를<br><span class="gold">더 빠르게.</span></h1>
         <p class="lead rise d3">연계과정으로 미래를 앞당기세요.</p>
-        <p class="desc rise d3">학부 재학 중 대학원 과목을 미리 이수하고, 석사·박사 학위를 단기간에 취득하는 부산대학교 특별 트랙입니다.</p>
+        <p class="desc rise d3">학부 재학 중 대학원 과목을 미리 이수하고, 석사·박사 학위를 단기간에 취득하는 패스트 트랙입니다.</p>
         <div class="cd rise d4" aria-label="원서접수 카운트다운">
           <span class="dday" id="dday">D-—</span>
           <span class="info"><b>원서접수 2026.07 예정</b>Status · 접수 예정</span>
@@ -1786,7 +1786,7 @@
     if(!dday) return;
     function tick(){
       var t=Math.max(0,target-Date.now());
-      dday.textContent='D-'+Math.ceil(t/86400000);
+      dday.textContent='D-00';
       h.textContent=p(Math.floor(t/3600000)%24);m.textContent=p(Math.floor(t/60000)%60);s.textContent=p(Math.floor(t/1000)%60);
     }
     tick();setInterval(tick,1000);
@@ -1808,7 +1808,7 @@
           </button>
           <div class="mast-right">
             <span class="mast-meta">2026학년도 2학기</span>
-            <button type="button" class="apply" data-apply>지원 희망 제출 <span class="a">→</span></button>
+            <button type="button" class="apply" data-apply>희망 전공 담기 및 알람신청 <span class="a">→</span></button>
           </div>
         </div>
         <div class="crumb">
@@ -1872,7 +1872,7 @@
         <h2>준비됐다면, <em>가장 빠른 시점</em>에 시작하세요.</h2>
         <p>학부 4학년 · 연계 진입 · 2026년 7월 접수 예정</p>
         <div class="row">
-          <button type="button" class="apply" data-apply>지원 희망 제출 <span class="a">→</span></button>
+          <button type="button" class="apply" data-apply>희망 전공 담기 및 알람신청 <span class="a">→</span></button>
           <button type="button" class="apply ghostbtn" data-view="departments">대학원 학과 보기</button>
         </div>
       </div>
@@ -1900,7 +1900,7 @@
           </button>
           <div class="mast-right">
             <span class="mast-meta">2026학년도 2학기</span>
-            <button type="button" class="apply" data-apply>지원 희망 제출 <span class="a">→</span></button>
+            <button type="button" class="apply" data-apply>희망 전공 담기 및 알람신청 <span class="a">→</span></button>
           </div>
         </div>
         <div class="crumb">
@@ -1916,7 +1916,7 @@
       <div class="phead">
         <div class="kicker rise d1">Section 02 — Eligibility</div>
         <h1 class="ptitle rise d2">지원 자격,<br><span class="gold">핵심만</span> 짚었습니다.</h1>
-        <p class="plead rise d3">두 가지 기준만 충족하면 됩니다 — <strong style="color:var(--ink)">이수학기 4학기 이상</strong>(상한 폐지), 그리고 <strong style="color:var(--ink)">총 평점평균 3.0/4.5 이상</strong>. 별도 대학원 입학시험은 없습니다.</p>
+        <p class="plead rise d3">두 가지 기준만 충족하면 됩니다 — <strong style="color:var(--ink)">이수학기 4학기 이상</strong>(상한 폐지 예정), 그리고 <strong style="color:var(--ink)">총 평점평균 3.0/4.5 이상</strong>. 별도 대학원 입학시험은 없습니다.</p>
       </div>
 
       <!-- 자가진단 진입점 (필수 보존) -->
@@ -1934,7 +1934,7 @@
       <section class="block rise d4">
         <div class="bhead"><span class="t">핵심 수치 — At a Glance</span><span class="c">Requirements</span></div>
         <div class="grid g4">
-          <div class="stat"><div class="k">이수학기</div><div class="n">4<span class="u">학기+</span></div><div class="lbl">최소 이수학기</div><div class="sub">상한 없음 · 4학기부터 지원 가능</div></div>
+          <div class="stat"><div class="k">이수학기</div><div class="n">4-7<span class="u">학기</span></div><div class="lbl">최소 이수학기</div><div class="sub">추후 상한학기 폐지 검토 중</div></div>
           <div class="stat"><div class="k">총 평점평균</div><div class="n">3.0<span class="u">/4.5</span></div><div class="lbl">최소 평점 기준</div><div class="sub">백분율 환산 약 66.7%</div></div>
           <div class="stat"><div class="k">추가 수강</div><div class="n">6<span class="u">학점</span></div><div class="lbl">매 학기 추가 수강</div><div class="sub">대학원 과목 선이수</div></div>
           <div class="stat"><div class="k">전형</div><div class="n">0<span class="u">시험</span></div><div class="lbl">무시험 특별전형</div><div class="sub">별도 입학시험 없음</div></div>
@@ -1943,19 +1943,19 @@
 
       <!-- 이수학기 트랙 -->
       <section class="block rise d5">
-        <div class="bhead"><span class="t">이수학기 범위 — Semesters</span><span class="c">4학기 이상 지원 가능</span></div>
+        <div class="bhead"><span class="t">이수학기 범위</span><span class="c">4학기 이상 지원 가능</span></div>
         <div class="card" style="padding:28px">
           <div class="track">
             <div class="cell">1</div><div class="cell">2</div><div class="cell">3</div>
-            <div class="cell on">4</div><div class="cell on">5</div><div class="cell on">6</div><div class="cell on">7</div><div class="cell on">8+</div>
+            <div class="cell on">4</div><div class="cell on">5</div><div class="cell on">6</div><div class="cell on">7</div><div class="cell">8+</div>
           </div>
-          <p style="margin-top:16px;font-size:13px;color:var(--ink-3);font-family:var(--mono);letter-spacing:.04em">■ 1–3학기 <span style="color:var(--ink-4)">지원 불가</span> &nbsp;·&nbsp; <span style="color:var(--amber)">■ 4학기 이상 지원 가능 (상한 폐지)</span></p>
+          <p style="margin-top:16px;font-size:13px;color:var(--ink-3);font-family:var(--mono);letter-spacing:.04em">■ 1–3학기 <span style="color:var(--ink-4)">지원 불가</span> &nbsp;·&nbsp; <span style="color:var(--amber)">■ 4-7학기 신청가능 (추후 상한학기 폐지 검토 중)</span></p>
         </div>
       </section>
 
       <!-- 성적 게이지 -->
       <section class="block rise d6">
-        <div class="bhead"><span class="t">총 평점평균 기준 — GPA</span><span class="c">3.0 / 4.5</span></div>
+        <div class="bhead"><span class="t">총 평점평균 기준</span><span class="c">3.0 / 4.5</span></div>
         <div class="card" style="padding:28px">
           <div class="gauge"><div class="fill" style="width:66.7%"><span>3.0 / 4.5</span></div><span class="max">4.5</span></div>
           <p style="margin-top:14px;font-size:13.5px;color:var(--ink-2);line-height:1.6">총 평점평균 <strong style="color:var(--amber)">3.0/4.5 이상</strong>(백분율 약 66.7%)을 충족해야 합니다. 4.5 만점 기준, 전 학기 누적 성적으로 산정합니다.</p>
@@ -1968,7 +1968,7 @@
         <dl class="spec">
           <div class="spec-row"><dt>6학기 졸업</dt><dd>전 학기 누적 <strong>졸업평점 4.0 이상</strong></dd><div class="val">4.0↑</div></div>
           <div class="spec-row"><dt>7학기 졸업</dt><dd>전 학기 누적 <strong>졸업평점 3.5 이상</strong></dd><div class="val">3.5↑</div></div>
-          <div class="spec-row"><dt>8학기 이상 졸업</dt><dd>전 학기 누적 <strong>졸업평점 3.0 이상</strong> (규정 개정 — 3.25→3.0 완화)</dd><div class="val">3.0↑</div></div>
+          <div class="spec-row"><dt>8학기 이상 졸업</dt><dd>전 학기 누적 <strong>졸업평점 3.25 이상</strong> (추후 규정 개정 예정 — 3.25→3.0 완화 예정)</dd><div class="val">3.25↑</div></div>
         </dl>
       </section>
 
@@ -1976,7 +1976,7 @@
       <section class="block rise d7">
         <div class="bhead"><span class="t">자격 상세 — Details</span><span class="c">05 items</span></div>
         <dl class="spec">
-          <div class="spec-row"><dt>이수학기</dt><dd><strong>4학기 이상</strong> 이수자 (상한 폐지 · 재학 중 신청 · 당해 학기 계절수업 반영 불가)</dd><div class="val">4학기+</div></div>
+          <div class="spec-row"><dt>이수학기</dt><dd><strong>4-7학기</strong> 이수자 (추후 상한학기 폐지 예정 · 재학 중 신청 · 당해 학기 계절수업 반영 불가)</dd><div class="val">4-7학기</div></div>
           <div class="spec-row"><dt>이수학점</dt><dd>학기별 수료학점 충족 — 1학기 = 수료학점의 1/2, 2학기 = 학년 수료학점 (<strong>학칙 제69조</strong>)</dd><div class="val">제69조</div></div>
           <div class="spec-row"><dt>총 평점평균</dt><dd>전 학기 누적 <strong>총 평점평균 3.0/4.5 이상</strong></dd><div class="val">3.0/4.5</div></div>
           <div class="spec-row"><dt>추천</dt><dd>소속대학 <strong>학과(부)장 또는 지도교수의 추천</strong></dd><div class="val">추천</div></div>
@@ -2036,7 +2036,7 @@
             </button>
             <div class="mast-right">
               <span class="mast-meta">2026학년도 2학기</span>
-              <button type="button" class="apply" data-apply>지원 희망 제출 <span class="a">→</span></button>
+              <button type="button" class="apply" data-apply>희망 전공 담기 및 알람신청 <span class="a">→</span></button>
             </div>
           </div>
           <div class="crumb">
