@@ -2622,7 +2622,9 @@
         return;
       }
 
-      var list = deptsForCol();
+      var list = deptsForCol().slice().sort(function(a, b){
+        return String(a.name).localeCompare(String(b.name), 'ko');
+      });
       if (sub) sub.textContent = list.length + '개';
       if (!list.length){
         col.innerHTML = emptyCol('🔍', q ? '검색 결과가 없습니다.' : '이 계열에 표시할 학과가 없습니다.');
@@ -2717,9 +2719,9 @@
                 (noRec ? '<span class="dept-badge norec">미모집</span>' : '') +
                 sampleNote +
               '</div>' +
-              tagsHtml +
               introHtml +
               '<dl class="dd-facts">' + facts.join('') + '</dl>' +
+              tagsHtml +
             '</div>' +
           '</div>' +
         '</div>';
