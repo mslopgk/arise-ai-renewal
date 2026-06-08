@@ -22,9 +22,8 @@ const L = '/google/logos/';
 const NAV = [
   ['vision', '사업소개'],
   ['partnership', '파트너십'],
-  ['ecosystem', 'AI 생태계'],
+  ['ecosystem', 'AI 서비스'],
   ['ai-services', 'AI Ecosystem'],
-  ['audience', '대상별 서비스'],
   ['education', '교육'],
   ['research', '연구'],
   ['participation', '참여'],
@@ -661,36 +660,58 @@ export default function GooglePartnership() {
 
                 {/* ── 제품 아이콘 (링 위에 배치) ── */}
                 {[
-                  { name: 'Gemini Gems', desc: '목표와 선호에 맞춘\n맞춤형 AI 어시스턴트', logo: L+'gemini-lg.png', color: '#4285F4', x: '47%', y: 225, align: 'center' },
-                  { name: 'NotebookLM', desc: '개인 문서를 정리·분석하는\nAI 연구 어시스턴트', logo: L+'notebooklm.png', color: '#0B57D0', x: '61%', y: 322, align: 'left' },
-                  { name: 'Google Pomelli', desc: '브랜드 맞춤 소셜 미디어\n캠페인을 만드는 AI 마케팅 툴', fallback: 'P', color: '#34A853', x: '62%', y: 410, align: 'left' },
-                  { name: 'Google Stitch', desc: '텍스트 프롬프트를\n레이아웃으로 변환하는 AI UI 툴', fallback: 'S', color: '#1A73E8', x: '57%', y: 480, align: 'left' },
-                  { name: 'Google AI Studio', desc: 'Google 생성형 모델로\n앱을 프로토타이핑하는 Web IDE', logo: L+'gemini.png', color: '#FBBC04', x: '50%', y: 520, align: 'left' },
-                  { name: 'Google Opal', desc: '간단한 AI 마이크로앱을\n만들고 공유하는 노코드 도구', fallback: 'O', color: '#9334E6', x: '25%', y: 508, align: 'right' },
-                  { name: 'Google Whisk', desc: 'Labs에서 만든\nAI 이미지 리믹싱·생성 도구', fallback: 'W', color: '#34A853', x: '18%', y: 459, align: 'right' },
-                  { name: 'Google Imagen 3', desc: '타이포·디테일에 강한\n초현실 텍스트-이미지 AI', fallback: 'I', color: '#4285F4', x: '15%', y: 385, align: 'right' },
-                  { name: 'Nano Banana', desc: 'Google DeepMind의\nAI 이미지 생성·편집 모델', fallback: 'N', color: '#FBBC04', x: '17%', y: 311, align: 'right' },
-                  { name: 'Google Lumiere', desc: '텍스트에서 사실적이고\n일관된 영상을 생성하는 AI 모델', fallback: 'L', color: '#EA4335', x: '22%', y: 253, align: 'right' },
-                ].map((item) => (
-                  <div key={item.name} className="absolute flex items-start gap-3" style={{
-                    left: item.x, top: item.y, zIndex: 5,
-                    transform: item.align === 'center' ? 'translateX(-50%)' : 'none',
-                    maxWidth: 220,
-                    flexDirection: item.align === 'right' ? 'row-reverse' : 'row',
-                    textAlign: item.align === 'right' ? 'right' : 'left',
-                  }}>
+                  { name: 'Gemini Gems', desc: '목표와 선호에 맞춘\n맞춤형 AI 어시스턴트', logo: L+'gemini-lg.png', color: '#4285F4' },
+                  { name: 'NotebookLM', desc: '개인 문서를 정리·분석하는\nAI 연구 어시스턴트', logo: L+'notebooklm.png', color: '#0B57D0' },
+                  { name: 'Google Pomelli', desc: '브랜드 맞춤 소셜 미디어\n캠페인을 만드는 AI 마케팅 툴', fallback: 'P', color: '#34A853' },
+                  { name: 'Google Stitch', desc: '텍스트 프롬프트를\n레이아웃으로 변환하는 AI UI 툴', fallback: 'S', color: '#1A73E8' },
+                  { name: 'Google AI Studio', desc: 'Google 생성형 모델로\n앱을 프로토타이핑하는 Web IDE', logo: L+'gemini.png', color: '#FBBC04' },
+                  { name: 'Google Opal', desc: '간단한 AI 마이크로앱을\n만들고 공유하는 노코드 도구', fallback: 'O', color: '#9334E6' },
+                  { name: 'Google Whisk', desc: 'Labs에서 만든\nAI 이미지 리믹싱·생성 도구', fallback: 'W', color: '#34A853' },
+                  { name: 'Google Imagen 3', desc: '타이포·디테일에 강한\n초현실 텍스트-이미지 AI', fallback: 'I', color: '#4285F4' },
+                  { name: 'Nano Banana', desc: 'Google DeepMind의\nAI 이미지 생성·편집 모델', fallback: 'N', color: '#FBBC04' },
+                  { name: 'Google Lumiere', desc: '텍스트에서 사실적이고\n일관된 영상을 생성하는 AI 모델', fallback: 'L', color: '#EA4335' },
+                ].map((item, i, arr) => {
+                  // 중앙 G 기준 균일 원형 배치 (반지름 250px, 정상부터 시계방향)
+                  const ang = (-90 + i * (360 / arr.length)) * Math.PI / 180;
+                  const dx = Math.cos(ang) * 250, dy = Math.sin(ang) * 250;
+                  const vertical = Math.abs(Math.cos(ang)) < 0.2; // 12·6시: 라벨을 아이콘 위/아래 중앙 정렬
+                  const icon = (
                     <div className="w-14 h-14 rounded-full bg-white shadow-lg border-2 border-white flex items-center justify-center shrink-0 overflow-hidden" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.12)' }}>
                       {item.logo
                         ? <img src={item.logo} alt={item.name} className="w-9 h-9 object-contain" />
                         : <span className="text-xl font-black" style={{ color: item.color }}>{item.fallback}</span>
                       }
                     </div>
-                    <div className="pt-1">
+                  );
+                  if (vertical) {
+                    const isTop = Math.sin(ang) < 0; // 12시면 라벨을 위로, 6시면 아래로
+                    return (
+                      <div key={item.name} className="absolute" style={{ left: '50%', top: `${(400 + dy).toFixed(1)}px`, transform: 'translate(-50%, -50%)', zIndex: 5 }}>
+                        {icon}
+                        <div className="absolute left-1/2 -translate-x-1/2 text-center" style={{ [isTop ? 'bottom' : 'top']: 'calc(100% + 8px)', width: 180 }}>
+                          <p className="text-[13px] font-extrabold leading-tight" style={{ color: item.color }}>{item.name}</p>
+                          <p className="text-[10px] text-gray-500 mt-1 leading-relaxed whitespace-pre-line">{item.desc}</p>
+                        </div>
+                      </div>
+                    );
+                  }
+                  const right = Math.cos(ang) > 0; // 오른쪽 반원이면 라벨을 바깥(오른쪽)으로
+                  return (
+                  <div key={item.name} className="absolute flex items-center gap-3" style={{
+                    left: `calc(50% + ${dx.toFixed(1)}px)`, top: `${(400 + dy).toFixed(1)}px`, zIndex: 5,
+                    width: 'max-content', maxWidth: 210,
+                    transform: right ? 'translate(-28px, -50%)' : 'translate(calc(-100% + 28px), -50%)',
+                    flexDirection: right ? 'row' : 'row-reverse',
+                    textAlign: right ? 'left' : 'right',
+                  }}>
+                    {icon}
+                    <div>
                       <p className="text-[13px] font-extrabold leading-tight" style={{ color: item.color }}>{item.name}</p>
                       <p className="text-[10px] text-gray-500 mt-1 leading-relaxed whitespace-pre-line">{item.desc}</p>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* ── Mobile ── */}
@@ -769,111 +790,6 @@ export default function GooglePartnership() {
         </div>
       </section>
 
-
-      {/* ================================================================
-          5. 대상별 서비스 — DX / AX
-      ================================================================ */}
-      <section id="audience" className="py-20 lg:py-28 bg-white border-b border-gray-200/60">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto text-center mb-12">
-            <p className="text-sm font-bold text-g-red tracking-widest uppercase mb-3">For You</p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-navy">나에게 맞는 서비스는?</h2>
-            <p className="mt-3 text-gray-500">대상별로 제공되는 AI 교육 서비스를 확인하세요.</p>
-          </div>
-
-          <div className="flex justify-center gap-3 mb-10">
-            {[
-              { key: 'student', label: '학생', icon: <GraduationCap className="w-4 h-4" /> },
-              { key: 'faculty', label: '교원', icon: <BookOpen className="w-4 h-4" /> },
-            ].map((t) => (
-              <button key={t.key} onClick={() => setActiveTab(t.key)}
-                className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all ${
-                  activeTab === t.key ? 'bg-navy text-white shadow-sm' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-100'
-                }`}>
-                {t.icon} {t.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
-            {activeTab === 'student' && (
-              <div className="grid lg:grid-cols-2">
-                <div className="p-8 lg:p-12">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs font-bold text-g-blue tracking-widest uppercase">Student</span>
-                    <span className="px-2 py-0.5 rounded-full bg-g-blue/10 text-g-blue text-[10px] font-bold">DX : Workspace for Education Plus</span>
-                  </div>
-                  <h3 className="text-2xl font-bold text-navy mt-2 mb-5">학생을 위한 AI 교육</h3>
-                  <ul className="space-y-3">
-                    {[
-                      'Google AI Pro for Education 무료 계정 발급',
-                      'Gemini Academy 국제 자격증 연계 과정',
-                      'AI Literacy MOOC 기초 소양 교육',
-                      '단과대학 맞춤형 AI+X 융합 교육',
-                      'NotebookLM 기반 개인 맞춤 학습 도우미',
-                      'VIBETHON 아이디어 경진대회 참여',
-                      '구글러 멘토링 & GTO 세션',
-                    ].map((item) => (
-                      <li key={item} className="flex items-start gap-3 text-sm text-gray-600">
-                        <ChevronRight className="w-4 h-4 text-g-blue mt-0.5 shrink-0" />{item}
-                      </li>
-                    ))}
-                  </ul>
-                  <button onClick={() => openRegister('student')} className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-g-blue hover:underline">
-                    학생 계정 등록하기 <ArrowUpRight className="w-4 h-4" />
-                  </button>
-                </div>
-                <div className="bg-gradient-to-br from-g-blue/5 to-g-blue/10 p-8 lg:p-12 flex items-center justify-center border-t lg:border-t-0 lg:border-l border-gray-200">
-                  <div className="text-center">
-                    <GraduationCap className="w-16 h-16 text-g-blue/20 mx-auto mb-4" />
-                    <p className="text-sm text-gray-500">학부생·대학원생 전원 대상</p>
-                    <p className="text-3xl font-extrabold text-g-blue mt-1">Workspace for Education plus</p>
-                    <p className="text-sm text-gray-500 mt-2">28,000 라이선스 무료 제공</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'faculty' && (
-              <div className="grid lg:grid-cols-2">
-                <div className="p-8 lg:p-12">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs font-bold text-g-green tracking-widest uppercase">Faculty</span>
-                    <span className="px-2 py-0.5 rounded-full bg-g-green/10 text-g-green text-[10px] font-bold">AX : AI Pro for Education</span>
-                  </div>
-                  <h3 className="text-2xl font-bold text-navy mt-2 mb-5">교원을 위한 AI 연구·교수 지원</h3>
-                  <ul className="space-y-3">
-                    {[
-                      'Google AI Pro for Education 연구 전용 계정',
-                      'Gemini Enterprise 고성능 AI 모델 접근 (1,000 계정)',
-                      'AI STAR 프로젝트 연구비 지원',
-                      '교수학습 실증 연구 공모 (15개 과제 선정)',
-                      'NotebookLM 기반 논문·데이터 분석 연구 인프라',
-                      '맞춤형 AI 교수법 연수 프로그램',
-                      'Google Korea 전문가 공동 세미나',
-                    ].map((item) => (
-                      <li key={item} className="flex items-start gap-3 text-sm text-gray-600">
-                        <ChevronRight className="w-4 h-4 text-g-green mt-0.5 shrink-0" />{item}
-                      </li>
-                    ))}
-                  </ul>
-                  <button onClick={() => openRegister('faculty')} className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-g-green hover:underline">
-                    교원 계정 등록하기 <ArrowUpRight className="w-4 h-4" />
-                  </button>
-                </div>
-                <div className="bg-gradient-to-br from-g-green/5 to-g-green/10 p-8 lg:p-12 flex items-center justify-center border-t lg:border-t-0 lg:border-l border-gray-200">
-                  <div className="text-center">
-                    <FlaskConical className="w-16 h-16 text-g-green/20 mx-auto mb-4" />
-                    <p className="text-sm text-gray-500">교원 전원 + 연구팀 전용</p>
-                    <p className="text-3xl font-extrabold text-g-green mt-1">AI Pro for Education</p>
-                    <p className="text-sm text-gray-500 mt-2">커스텀 에이전트 개발 + 고성능 AI</p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
 
 
       {/* ================================================================
