@@ -1525,7 +1525,7 @@
 .edx .blist{display:flex;flex-direction:column;gap:12px}
 .edx .brow{display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px 24px;transition:border-color .25s,transform .25s var(--ease),background .25s}
 .edx .brow:hover{border-color:var(--line-2);transform:translateX(4px);background:var(--surface-2)}
-.edx .brow .bn{font-family:var(--mono);font-size:clamp(28px,3vw,38px);font-weight:900;color:var(--amber);line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums;text-shadow:0 0 22px var(--glow);white-space:nowrap}
+.edx .brow .bn{font-family:var(--mono);font-size:clamp(28px,3vw,38px);font-weight:900;color:var(--amber);line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums;text-shadow:0 0 22px var(--glow);white-space:nowrap;min-width:2.9em;text-align:left}
 .edx .brow .bt2 strong{display:block;font-size:17px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
 .edx .brow .bt2 span{display:block;font-size:13px;color:var(--ink-3);margin-top:4px;line-height:1.55}
 .edx .brow .tag{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--ink-4);text-transform:uppercase;white-space:nowrap}
@@ -2059,35 +2059,25 @@
         <section class="block rise d4">
           <div class="bhead"><span class="t">핵심 혜택 — Key Benefits</span><span class="c">04 items</span></div>
           <div class="blist">
-            <div class="brow"><span class="bn">100<span style="font-size:.5em">%</span></span><span class="bt2"><strong>등록금 전액 장학</strong><span>연계과정 장학 + SAM·BK21 Bridge·연구지원장려금 중복 지원 가능</span></span><span class="tag">Tuition</span></div>
+            <div class="brow"><span class="bn">100<span style="font-size:.5em">%</span></span><span class="bt2"><strong>특정학기 장학금 지급</strong><span>연계과정 장학</span></span><span class="tag">Tuition</span></div>
             <div class="brow"><span class="bn">6<span style="font-size:.5em">학점</span></span><span class="bt2"><strong>대학원 학점 인정</strong><span>학사에서 이수한 대학원 전공 6학점을 석·박사 수료학점으로 그대로 인정</span></span><span class="tag">Credit</span></div>
-            <div class="brow"><span class="bn">−6<span style="font-size:.5em">학점</span></span><span class="bt2"><strong>졸업학점 감면</strong><span>일반선택 6학점 감면 + 졸업논문·시험 면제로 졸업 부담 완화</span></span><span class="tag">Waiver</span></div>
-            <div class="brow"><span class="bn">0<span style="font-size:.5em">시험</span></span><span class="bt2"><strong>무시험 특별전형</strong><span>별도 대학원 입학시험 없이 진학, 6학기 조기졸업 후 바로 석사 진입</span></span><span class="tag">Direct</span></div>
+            <div class="brow"><span class="bn" style="font-family:var(--sans);font-weight:800;letter-spacing:-.02em;font-variant-numeric:normal">면제</span><span class="bt2"><strong>졸업요건 면제</strong><span>졸업논문 또는 졸업시험 등 학과(부) 또는 전공별 졸업요건 면제. 단, 학과(부)별 영어 표준외국어능력시험(TOEIC) 졸업요건 및 각종 교육인증제 해당 학생은 인증요건을 충족하여야 함</span></span><span class="tag">Waiver</span></div>
+            <div class="brow"><span class="bn">0<span style="font-size:.5em">시험</span></span><span class="bt2"><strong>무시험 특별전형</strong><span>별도 대학원 입학시험 없이 진학 (면접시험은 있을 수 있음)</span></span><span class="tag">Direct</span></div>
           </div>
         </section>
 
         <!-- 장학 종류 + 큰 수치 -->
         <section class="block rise d5">
-          <div class="bhead"><span class="t">장학 종류 — Scholarships</span><span class="c">04 · 중복 지원 가능</span></div>
+          <div class="bhead"><span class="t">장학 종류 — Scholarships</span><span class="c">04</span></div>
 
-          <!-- ① 등록금 전액 — featured stat -->
-          <div class="grid g2" style="align-items:stretch;margin-bottom:16px">
-            <div class="stat">
-              <div class="k">/ 01 — Tuition</div>
-              <div class="n">100<span class="u">%</span></div>
-              <div class="lbl">연계과정 등록금 전액 장학</div>
-              <div class="sub">담당 · 학생과 510-1282</div>
-            </div>
+          <!-- ①②③④ 장학 4종 — 가로 일렬 -->
+          <div class="grid g4">
             <article class="card">
               <div class="card-head"><span class="no">/ 01</span></div>
               <h3>연계과정 등록금 전액</h3>
               <p><strong>학·석사 트랙</strong> — 석사과정(총 3학기) 중 <strong>2·3학기</strong> 등록금 전액 지원.</p>
               <p style="margin-top:8px"><strong>학·석박사통합 트랙</strong> — 석사 <strong>2·3학기</strong> + 박사 <strong>5·6학기</strong> 등록금 전액 지원.</p>
             </article>
-          </div>
-
-          <!-- ②③④ -->
-          <div class="grid g3">
             <article class="card">
               <div class="card-head"><span class="no">/ 02</span></div>
               <h3>SAM분야 진흥장려금</h3>
@@ -2118,7 +2108,6 @@
               <ul>
                 <li>8학기 이수자(정규졸업 예정자)는 학사 졸업 <strong>전체평점평균 3.8 이상</strong>(소수점 셋째자리 절사)일 경우에만 지급</li>
                 <li>등록기간에 자비 등록 후 학기 중 개별 계좌로 지급</li>
-                <li>장학 종류 간 <strong>중복 지원</strong> 가능</li>
               </ul>
             </div>
             <div class="note warn">
