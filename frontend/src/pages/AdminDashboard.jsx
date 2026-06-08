@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import DeptDirectoryAdmin from './DeptDirectoryAdmin.jsx';
 
 const COLORS = ['#3672b8', '#5d9cd5', '#88c1eb', '#b8d9f2', '#dcebf8'];
 
@@ -10,6 +11,7 @@ export default function AdminDashboard() {
   const [me, setMe] = useState(null);
   const [error, setError] = useState(null);
   const [syncing, setSyncing] = useState(false);
+  const [view, setView] = useState('stats'); // 'stats' | 'directory'
 
   useEffect(() => {
     (async () => {
@@ -67,9 +69,16 @@ export default function AdminDashboard() {
         </div>
       </header>
 
-      {error && <div style={styles.error}>{error}</div>}
+      <div style={styles.tabs}>
+        <button onClick={() => setView('stats')} style={{ ...styles.tab, ...(view === 'stats' ? styles.tabActive : {}) }}>신청 현황</button>
+        <button onClick={() => setView('directory')} style={{ ...styles.tab, ...(view === 'directory' ? styles.tabActive : {}) }}>학과 디렉터리 관리</button>
+      </div>
 
-      {stats && (
+      {view === 'directory' && <DeptDirectoryAdmin />}
+
+      {view === 'stats' && error && <div style={styles.error}>{error}</div>}
+
+      {view === 'stats' && stats && (
         <>
           {stats.not_synced > 0 && stats.sheet.configured && (
             <div style={styles.warn}>
@@ -193,4 +202,7 @@ const styles = {
   primaryButton: { background:'#3672b8', color:'#fff', textDecoration:'none', padding:'10px 18px', borderRadius:6, fontSize:14, fontWeight:600 },
   secondaryButton: { background:'#1f2230', color:'#e8e8ea', textDecoration:'none', padding:'10px 18px', borderRadius:6, fontSize:14, border:'1px solid #3a3d48' },
   footer: { marginTop:20, color:'#5a5a62', fontSize:12, textAlign:'right' },
+  tabs: { display:'flex', gap:8, marginBottom:18 },
+  tab: { background:'transparent', color:'#aaa', border:'1px solid #2a2d38', padding:'8px 16px', borderRadius:8, cursor:'pointer', fontSize:14, fontWeight:600 },
+  tabActive: { background:'#23262f', color:'#fff', borderColor:'#3a3d48' },
 };

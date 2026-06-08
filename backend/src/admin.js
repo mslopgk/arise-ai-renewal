@@ -190,4 +190,96 @@ router.get('/responses.csv', requireAdmin, async (req, res) => {
   res.send('﻿' + lines.join('\n'));
 });
 
+// === 학과 디렉터리 관리 (CRUD, 관리자 전용) ===
+const MAX_IMG = 2 * 1024 * 1024; // 2MB
+
+function parseImage(dataUrl) {
+  const m = /^data:([\w/+.-]+);base64,(.+)$/s.exec(dataUrl || '');
+  if (!m) return null;
+  return { mime: m[1], buf: Buffer.from(m[2], 'base64') };
+}
+
+function rowParams(b) {
+  return [
+    String(b.gyeyeol || '').trim(), String(b.name || '').trim(),
+    b.recruit === false ? 0 : 1, b.homepage || null,
+    JSON.stringify(Array.isArray(b.hashtags) ? b.hashtags : []),
+    b.location || null, b.phone || null,
+    b.bk21 ? 1 : 0, b.bk21_name || null, b.bk21_url || null,
+    b.intro || null, Number.isInteger(b.ord) ? b.ord : 0,
+  ];
+}
+
+// 이미지 적용(image=dataURL 저장 / imageClear=true 제거). table: dir_departments|dir_majors
+async function applyImage(table, id, b, res) {
+  if (b.imageClear) {
+    await db.prepare(`UPDATE ${table} SET image_mime=NULL, image_data=NULL WHERE id=?`).run(id);
+  } else if (b.image) {
+    const img = parseImage(b.image);
+    if (!img) { res.status(400).json({ error: 'bad_image' }); return false; }
+    if (!/^image\//.test(img.mime)) { res.status(400).json({ error: 'not_image' }); return false; }
+    if (img.buf.length > MAX_IMG) { res.status(413).json({ error: 'image_too_large' }); return false; }
+    await db.prepare(`UPDATE ${table} SET image_mime=?, image_data=? WHERE id=?`).run(img.mime, img.buf, id);
+  }
+  return true;
+}
+
+const DEPT_COLS = 'gyeyeol,name,recruit,homepage,hashtags,location,phone,bk21,bk21_name,bk21_url,intro,ord';
+const DEPT_VALS = '?,?,?,?,?::jsonb,?,?,?,?,?,?,?';
+const DEPT_SET = 'gyeyeol=?,name=?,recruit=?,homepage=?,hashtags=?::jsonb,location=?,phone=?,bk21=?,bk21_name=?,bk21_url=?,intro=?,ord=?';
+
+// 학과 생성
+router.post('/departments', requireAdmin, async (req, res) => {
+  const b = req.body || {};
+  if (!b.name || !b.gyeyeol) return res.status(400).json({ error: 'name_and_gyeyeol_required' });
+  const row = await db.prepare(`INSERT INTO dir_departments (${DEPT_COLS}) VALUES (${DEPT_VALS}) RETURNING id`).get(...rowParams(b));
+  if (!(await applyImage('dir_departments', row.id, b, res))) return;
+  res.json({ id: row.id });
+});
+
+// 학과 수정
+router.put('/departments/:id', requireAdmin, async (req, res) => {
+  const b = req.body || {};
+  const id = req.params.id;
+  const exist = await db.prepare('SELECT id FROM dir_departments WHERE id=?').get(id);
+  if (!exist) return res.status(404).json({ error: 'not_found' });
+  await db.prepare(`UPDATE dir_departments SET ${DEPT_SET} WHERE id=?`).run(...rowParams(b), id);
+  if (!(await applyImage('dir_departments', id, b, res))) return;
+  res.json({ id: Number(id) });
+});
+
+// 학과 삭제 (세부전공 cascade)
+router.delete('/departments/:id', requireAdmin, async (req, res) => {
+  await db.prepare('DELETE FROM dir_departments WHERE id=?').run(req.params.id);
+  res.status(204).end();
+});
+
+// 세부전공 생성
+router.post('/departments/:id/majors', requireAdmin, async (req, res) => {
+  const b = req.body || {};
+  const dept = await db.prepare('SELECT id FROM dir_departments WHERE id=?').get(req.params.id);
+  if (!dept) return res.status(404).json({ error: 'dept_not_found' });
+  if (!b.name) return res.status(400).json({ error: 'name_required' });
+  const row = await db.prepare(`INSERT INTO dir_majors (dept_id,${DEPT_COLS.replace('gyeyeol,', '')}) VALUES (?,${DEPT_VALS.replace('?,?,', '?,')}) RETURNING id`)
+    .get(req.params.id, ...rowParams({ ...b, gyeyeol: '_' }).slice(1));
+  if (!(await applyImage('dir_majors', row.id, b, res))) return;
+  res.json({ id: row.id });
+});
+
+// 세부전공 수정
+router.put('/departments/:id/majors/:mid', requireAdmin, async (req, res) => {
+  const b = req.body || {};
+  const m = await db.prepare('SELECT id FROM dir_majors WHERE id=? AND dept_id=?').get(req.params.mid, req.params.id);
+  if (!m) return res.status(404).json({ error: 'not_found' });
+  await db.prepare(`UPDATE dir_majors SET ${DEPT_SET.replace('gyeyeol=?,', '')} WHERE id=?`).run(...rowParams({ ...b, gyeyeol: '_' }).slice(1), req.params.mid);
+  if (!(await applyImage('dir_majors', req.params.mid, b, res))) return;
+  res.json({ id: Number(req.params.mid) });
+});
+
+// 세부전공 삭제
+router.delete('/departments/:id/majors/:mid', requireAdmin, async (req, res) => {
+  await db.prepare('DELETE FROM dir_majors WHERE id=? AND dept_id=?').run(req.params.mid, req.params.id);
+  res.status(204).end();
+});
+
 export default router;

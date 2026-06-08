@@ -3056,7 +3056,7 @@
   var deptCbs = [];
   function onDepartments(cb){ if(deptLoaded) cb(departments); else deptCbs.push(cb); }
   function fireDeptCbs(){ var cbs = deptCbs.slice(); deptCbs = []; cbs.forEach(function(cb){ try{ cb(departments); }catch(e){ console.error(e); } }); }
-  fetch('/data/departments.json')
+  fetch('/api/departments')
     .then(function(r){ return r.ok ? r.json() : []; })
     .then(function(data){ departments = Array.isArray(data) ? data : []; deptLoaded = true; buildPickDeptSelect(); fireDeptCbs(); })
     .catch(function(){ departments = []; deptLoaded = true; buildPickDeptSelect(); fireDeptCbs(); });

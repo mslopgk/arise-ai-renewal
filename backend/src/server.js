@@ -6,7 +6,7 @@ import { networkInterfaces } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 import { existsSync, readFileSync } from 'node:fs';
-import { initSchema } from './db.js';
+import { initSchema, seedDirectoryIfEmpty, getDirectoryTree, getDeptImage, getMajorImage } from './db.js';
 import authRouter from './auth.js';
 import surveysRouter from './surveys.js';
 import adminRouter from './admin.js';
@@ -14,6 +14,12 @@ import adminRouter from './admin.js';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 await initSchema();
+// 학과 디렉터리: 비어있으면 정적 JSON 으로 1회 시드 (이후 DB가 원본)
+try {
+  const seedJson = JSON.parse(readFileSync(resolve(__dirname, 'data', 'departments.json'), 'utf8'));
+  const r = await seedDirectoryIfEmpty(seedJson);
+  if (r.seeded) console.log(`[directory] seeded ${r.count} departments from departments.json`);
+} catch (e) { console.error('[directory] seed failed:', e.message); }
 
 const app = express();
 const isProd = process.env.NODE_ENV === 'production';
@@ -22,7 +28,7 @@ const isDev = !isProd;
 // HTTPS proxy(Cloudflare Tunnel / nginx) 뒤에 있을 때 X-Forwarded-Proto 신뢰
 app.set('trust proxy', 1);
 
-app.use(express.json({ limit: '512kb' }));
+app.use(express.json({ limit: '8mb' })); // 이미지 base64 업로드 허용
 app.use(cookieParser());
 
 // === CORS ===
@@ -54,19 +60,31 @@ app.use('/auth', authRouter);
 app.use('/api/surveys', surveysRouter);
 app.use('/api/admin', adminRouter);
 
-// 학과 디렉터리 (공개 — 인증 불필요). departments.json을 그대로 반환.
-const DEPARTMENTS_PATH = resolve(__dirname, 'data', 'departments.json');
-let _departmentsCache = null;
-app.get('/api/departments', (req, res) => {
+// 학과 디렉터리 (공개 — 인증 불필요). DB에서 조립해 반환(관리자 편집 즉시 반영).
+app.get('/api/departments', async (req, res) => {
   try {
-    if (!_departmentsCache) {
-      _departmentsCache = JSON.parse(readFileSync(DEPARTMENTS_PATH, 'utf8'));
-    }
-    res.json(_departmentsCache);
+    res.set('Cache-Control', 'no-cache');
+    res.json(await getDirectoryTree());
   } catch (err) {
     console.error('[departments] read failed:', err.message);
     res.status(500).json({ error: 'departments_unavailable' });
   }
+});
+
+// 학과/세부전공 이미지 서빙 (DB bytea)
+function sendImage(res, row) {
+  if (!row || !row.image_data) return res.status(404).end();
+  res.set('Content-Type', row.image_mime || 'image/jpeg');
+  res.set('Cache-Control', 'no-cache');
+  res.send(row.image_data);
+}
+app.get('/api/departments/:id/image', async (req, res) => {
+  try { sendImage(res, await getDeptImage(req.params.id)); }
+  catch (e) { res.status(500).end(); }
+});
+app.get('/api/departments/:id/majors/:mid/image', async (req, res) => {
+  try { sendImage(res, await getMajorImage(req.params.mid)); }
+  catch (e) { res.status(500).end(); }
 });
 
 app.get('/health', (req, res) => res.json({ ok: true }));
