@@ -2204,7 +2204,7 @@
 
   /* ── 3컬럼 캐스케이드 ── */
   .cas-cols{
-    display:grid; grid-template-columns:1fr 2fr; gap:16px;
+    display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px;
     margin-bottom:8px;
   }
   .cas-col{
@@ -2261,12 +2261,12 @@
   .cas-item-ico svg{ width:20px; height:20px; }
   .cas-item-body{ flex:1 1 auto; min-width:0; }
   .cas-item-name{
-    font-size:22px; font-weight:700; letter-spacing:-.03em; color:inherit;
-    white-space:normal; line-height:1.3;
+    font-size:16px; font-weight:700; letter-spacing:-.02em; color:inherit;
+    white-space:normal; line-height:1.35;
   }
   .cas-item-name--lg{
-    font-size:22px; font-weight:700; letter-spacing:-.03em; color:inherit;
-    white-space:normal; line-height:1.3;
+    font-size:16px; font-weight:700; letter-spacing:-.02em; color:inherit;
+    white-space:normal; line-height:1.35;
   }
   .cas-item-dept{ padding:18px 20px; align-items:flex-start; }
   .cas-item-dept .cas-item-meta{ flex-wrap:wrap; gap:4px 10px; margin-top:8px; }
@@ -2324,7 +2324,7 @@
   }
   .casm-dialog{
     position:relative; z-index:1;
-    width:min(860px, 100%); max-height:calc(100vh - 48px);
+    width:min(1000px, 100%); max-height:calc(100vh - 48px);
     overflow-y:auto;
     border-radius:20px;
     scrollbar-width:thin; scrollbar-color:var(--line-2) transparent;
@@ -2397,6 +2397,24 @@
   .dd-fact dd a:hover{ text-decoration:underline; }
   .dd-fact dd.is-ph{ color:var(--ink-4); font-weight:500; font-style:italic; }
 
+  /* 우측 16:9 이미지 영역 — data.image 있으면 표시, 없으면 빈 플레이스홀더 */
+  .dd-media{ padding:34px 34px 30px; }
+  .dd-media-frame{
+    position:relative; aspect-ratio:16/9; width:100%;
+    border-radius:14px; overflow:hidden;
+    background:var(--bg-2); border:1px solid var(--line);
+  }
+  .dd-media-frame img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .dd-media-ph{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:var(--ink-4);
+    background:repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,.014) 10px, rgba(255,255,255,.014) 20px);
+  }
+  .dd-media-ph svg{ width:44px; height:44px; opacity:.32; }
+  @media (min-width:720px){
+    .dd-hero{ grid-template-columns:1.15fr 1fr; align-items:center; }
+    .dd-media{ padding:30px 34px 30px 6px; }
+  }
+
   .dd-ph-note{
     display:inline-flex; align-items:center; gap:.35em;
     margin-left:.5em;
@@ -2451,11 +2469,20 @@
       </div>
       <div class="cas-col-body" id="casColDept" role="listbox" aria-label="학과 목록" tabindex="0" aria-live="polite"></div>
     </section>
+
+    <!-- 컬럼3: 세부전공 -->
+    <section class="cas-col" aria-label="세부전공 선택">
+      <div class="cas-col-head">
+        <span class="cas-col-label">세부전공</span>
+        <span class="cas-col-sub" id="casColSub3"></span>
+      </div>
+      <div class="cas-col-body" id="casColMajor" role="listbox" aria-label="세부전공 목록" tabindex="0" aria-live="polite"></div>
+    </section>
   </div>
 
   <!-- 짧은 미선택 안내 -->
   <p class="cas-hint" id="casHint">
-    <span class="ico" aria-hidden="true">🎓</span> 학과를 클릭하면 상세 정보가 팝업으로 열립니다.
+    <span class="ico" aria-hidden="true">🎓</span> 학과를 클릭하면 상세 정보가 팝업으로 열립니다. 전공이 여럿인 학과는 세부전공까지 선택하세요.
   </p>
 
 </div>
@@ -2483,7 +2510,9 @@
       { key:'공학',     ico:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>' },
       { key:'예술',     ico:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>' },
       { key:'체육',     ico:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>' },
-      { key:'의학',     ico:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27"/></svg>' }
+      { key:'의학',     ico:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27"/></svg>' },
+      { key:'협동과정', ico:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>' },
+      { key:'계약학과', ico:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>' }
     ];
 
     // 상세 선택필드 SAMPLE (학과명 → 예시값). 데이터에 실제 필드가 들어오면 그 값이 우선.
@@ -2514,8 +2543,8 @@
     };
 
     // ── 상태 ──
-    // gye: 활성 계열 키(null=미선택), deptId: 활성 학과 id(null), q: 검색어, bk21: 토글
-    var state = { gye:null, deptId:null, q:'', bk21:false };
+    // gye: 활성 계열 키(null=미선택), deptId: 활성 학과 id(null), majorName: 활성 세부전공명(null), q: 검색어, bk21: 토글
+    var state = { gye:null, deptId:null, majorName:null, q:'', bk21:false };
 
     function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
     function $(id){ return document.getElementById(id); }
@@ -2639,11 +2668,64 @@
       col.querySelectorAll('.cas-item').forEach(function(btn){
         btn.addEventListener('click', function(){
           var d2 = deptById(btn.dataset.id);
-          if (d2) openModal(d2, '');
+          if (d2) selectDept(d2.id);
         });
       });
     }
 
+    // ── 컬럼3: 세부전공 (학과에 전공 2개+ 일 때만) ──
+    function deptMajors(d){ return (d && d.majors && d.majors.length >= 2) ? d.majors : []; }
+
+    function selectDept(id){
+      state.deptId = id;
+      state.majorName = null;
+      renderDept();      // 학과 하이라이트
+      renderMajor();     // 세부전공 컬럼
+      var d = deptById(id);
+      if (deptMajors(d).length){ focusFirst('casColMajor'); }
+      else { openModal(d, ''); }   // 전공 0~1개 → 학과 팝업 바로
+    }
+
+    function renderMajor(){
+      var col = $('casColMajor'); if (!col) return;
+      var sub = $('casColSub3');
+      var d = state.deptId != null ? deptById(state.deptId) : null;
+      if (!d){ col.innerHTML = emptyCol('←', '학과를 선택하세요.'); if (sub) sub.textContent = ''; return; }
+      var majors = deptMajors(d);
+      if (!majors.length){ col.innerHTML = emptyCol('🎓', '세부전공 구분이 없는 학과입니다.'); if (sub) sub.textContent = ''; return; }
+      var list = majors.slice().sort(function(a, b){ return String(a.name).localeCompare(String(b.name), 'ko'); });
+      if (sub) sub.textContent = list.length + '개';
+      col.innerHTML = list.map(function(m){
+        var noRec = m.recruit === false;
+        var active = state.majorName === m.name;
+        return '<button type="button" class="cas-item cas-item-dept cas-info' + (active ? ' is-active' : '') + (noRec ? ' no-recruit' : '') +
+          '" role="option" aria-selected="' + (active ? 'true' : 'false') + '"' + (active ? ' aria-current="true"' : '') +
+          ' data-major="' + esc(m.name) + '">' +
+          '<span class="cas-item-body">' +
+            '<span class="cas-item-name cas-item-name--lg">' + esc(m.name) + '</span>' +
+            (noRec ? '<span class="cas-item-meta"><span class="norec">미모집</span></span>' : '') +
+          '</span>' +
+          '<span class="cas-item-chev" aria-hidden="true">›</span>' +
+          '</button>';
+      }).join('');
+      col.querySelectorAll('.cas-item').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          state.majorName = btn.dataset.major;
+          renderMajor();
+          var m = (d.majors || []).find(function(x){ return x.name === btn.dataset.major; });
+          if (m) openMajorModal(m, d);
+        });
+      });
+    }
+
+
+    // 팝업 우측 16:9 이미지 (img 있으면 표시, 없으면 빈 플레이스홀더)
+    function mediaHtml(img){
+      var inner = img
+        ? '<img src="' + esc(img) + '" alt="" loading="lazy" />'
+        : '<div class="dd-media-ph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg></div>';
+      return '<div class="dd-media"><div class="dd-media-frame">' + inner + '</div></div>';
+    }
 
     function emptyCol(ico, msg){
       return '<div class="cas-col-empty"><span class="ico" aria-hidden="true">' + ico + '</span><span>' + esc(msg) + '</span></div>';
@@ -2653,7 +2735,8 @@
     function selectGye(gye){
       state.gye = gye;
       state.deptId = null;
-      renderGye(); renderDept();
+      state.majorName = null;
+      renderGye(); renderDept(); renderMajor();
       focusFirst('casColDept');
     }
     function focusFirst(colId){
@@ -2712,8 +2795,60 @@
               '<dl class="dd-facts">' + facts.join('') + '</dl>' +
               tagsHtml +
             '</div>' +
+            mediaHtml(x.image) +
           '</div>' +
         '</div>';
+    }
+
+    // ── 세부전공 상세: 전공값 → 상위 학과값(enrich) → 빈 채로(준비중 표기 없음) ──
+    function majorDetailHtml(m, dept){
+      var px = enrich(dept);
+      var homepage  = m.homepage || px.homepage;
+      var intro     = m.intro || px.intro;
+      var hashtags  = (m.hashtags && m.hashtags.length) ? m.hashtags : px.hashtags;
+      var location  = m.location || dept.location;
+      var phone     = m.phone || dept.phone;
+      var bk21      = (m.bk21 != null) ? m.bk21 : dept.bk21;
+      var bk21_name = m.bk21_name || px.bk21_name;
+      var bk21_url  = m.bk21_url || dept.bk21_url;
+      var noRec     = m.recruit === false;
+
+      var tagsHtml = (hashtags && hashtags.length)
+        ? '<div class="dd-tags">' + hashtags.map(function(t){ var s = String(t); if (s[0] !== '#') s = '#' + s; return '<span class="dd-tag">' + esc(s) + '</span>'; }).join('') + '</div>'
+        : '';
+      var introHtml = intro ? '<p class="dd-intro">' + esc(intro) + '</p>' : '';
+
+      var facts = [];
+      if (location) facts.push('<div class="dd-fact"><dt>📍 위치</dt><dd>' + esc(location) + '</dd></div>');
+      if (phone)    facts.push('<div class="dd-fact"><dt>📞 전화</dt><dd><a href="tel:' + esc(String(phone).replace(/[^\d-]/g,'')) + '">' + esc(phone) + '</a></dd></div>');
+      if (homepage) facts.push('<div class="dd-fact"><dt>홈페이지</dt><dd><a href="' + esc(normUrl(homepage)) + '" target="_blank" rel="noopener noreferrer">방문하기 ↗</a></dd></div>');
+      if (bk21 && bk21_name){
+        var bu = normUrl(bk21_url);
+        facts.push('<div class="dd-fact"><dt>★ BK21 사업단</dt><dd>' + (bu ? '<a href="' + esc(bu) + '" target="_blank" rel="noopener noreferrer">' + esc(bk21_name) + ' ↗</a>' : esc(bk21_name)) + '</dd></div>');
+      }
+      var factsHtml = facts.length ? '<dl class="dd-facts">' + facts.join('') + '</dl>' : '';
+
+      return '' +
+        '<div class="dd-detail"><div class="dd-hero"><div class="dd-hero-body">' +
+          '<h2 class="dd-hero-name" id="casmTitle">' + esc(m.name) + '</h2>' +
+          '<div class="dept-badges">' +
+            '<span class="dept-badge gye">' + esc(dept.gyeyeol) + '</span>' +
+            '<span class="dept-badge" style="background:var(--bg-2);color:var(--ink-3)">' + esc(dept.name) + '</span>' +
+            (bk21 ? '<span class="dept-badge bk21">★ BK21</span>' : '') +
+            (noRec ? '<span class="dept-badge norec">미모집</span>' : '') +
+          '</div>' +
+          introHtml + factsHtml + tagsHtml +
+        '</div>' + mediaHtml(m.image || px.image) + '</div></div>';
+    }
+
+    function openMajorModal(m, dept){
+      var modal = $('casmModal'), body = $('casmBody'), dialog = $('casmDialog');
+      if (!modal || !body || !m) return;
+      lastFocus = document.activeElement;
+      body.innerHTML = majorDetailHtml(m, dept);
+      modal.hidden = false;
+      document.body.style.overflow = 'hidden';
+      if (dialog) dialog.focus();
     }
 
     // ── 모달 열기/닫기 ──
@@ -2745,7 +2880,9 @@
       var s = $('casSearch');
       if (s) s.addEventListener('input', function(){
         state.q = s.value;
-        renderGye(); renderDept();
+        state.deptId = null;
+        state.majorName = null;
+        renderGye(); renderDept(); renderMajor();
       });
 
       var bk = $('casBk21');
@@ -2758,7 +2895,7 @@
           var d = deptById(state.deptId);
           if (d && !d.bk21){ state.deptId = null; }
         }
-        renderGye(); renderDept();
+        renderGye(); renderDept(); renderMajor();
       });
 
       // 모달 닫기: ✕ 버튼 + 배경 클릭
@@ -2785,7 +2922,7 @@
       if (bk){ bk.classList.toggle('active', state.bk21); bk.setAttribute('aria-pressed', String(state.bk21)); }
       // 활성 학과가 사라졌으면 초기화
       if (state.deptId != null && !deptById(state.deptId)) state.deptId = null;
-      renderGye(); renderDept();
+      renderGye(); renderDept(); renderMajor();
     }
 
     function updateCount(){
@@ -2798,7 +2935,7 @@
     return function init(){
       bindOnce();
       // 항상 한 번 렌더(데이터 미수신이면 빈 컬럼/안내)
-      renderGye(); renderDept();
+      renderGye(); renderDept(); renderMajor();
       if (window.PNU && typeof window.PNU.onDepartments === 'function'){
         window.PNU.onDepartments(function(list){ applyData(list); updateCount(); });
       } else {
