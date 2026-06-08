@@ -33,6 +33,16 @@
   --font-heavy: "Black Han Sans", "Archivo Variable", "Pretendard Variable", sans-serif;
   --font-jakarta: "Plus Jakarta Sans Variable", "Plus Jakarta Sans", "Pretendard Variable", sans-serif;
   --font-myeongjo: "Nanum Myeongjo", "Gowun Batang", serif;
+
+  /* --- google 변형(PNU × Google) 색 토큰 — bg-navy / text-g-blue 등 유틸 생성용.
+         색 이름이 기존 토큰과 겹치지 않아 다른 페이지 영향 없음(추가만). --- */
+  --color-navy: #0B1F4A;
+  --color-navy-light: #132D5E;
+  --color-navy-50: #EDF1F7;
+  --color-g-blue: #4285F4;
+  --color-g-red: #EA4335;
+  --color-g-yellow: #FBBC04;
+  --color-g-green: #34A853;
 }
 
 /* --- 원본 globals.css 의 baseline. @layer base 에 둬서 pnug(위)·변형 루트

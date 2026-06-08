@@ -48,15 +48,14 @@ export default function Gateway() {
               </Link>
             </li>
 
-            {/* Menu 2: Google Partnership (Disabled/Coming Soon) */}
+            {/* Menu 2: Google Partnership */}
             <li>
-              <div className="gateway-btn google">
-                <span className="tag">준비중</span>
+              <Link className="gateway-btn google" to="/google">
                 <span className="num">02</span>
-                <strong>Google 협력</strong>
-                <span className="desc">Google과 함께하는 AI 교육·연구 협력 (오픈 예정)</span>
+                <strong>PNU × Google AI Eco System</strong>
+                <span className="desc">Google과 함께하는 AI 교육·연구 협력</span>
                 <span className="btn-arrow"><span className="arrow-icon"></span></span>
-              </div>
+              </Link>
             </li>
 
             {/* Menu 3: Application process (Direct static page routing) */}

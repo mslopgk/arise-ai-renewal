@@ -1,0 +1,29 @@
+/* ============================================================
+   google — PNU × Google AI Ecosystem (variant-only CSS)
+   협업자 레포(arise-pnu.google) index.css 의 커스텀 클래스 이식.
+   색 토큰(navy, g-*)은 전역 tailwind.css @theme 에 등록되어
+   bg-navy / text-g-blue 등 유틸리티로 생성된다.
+   여기 클래스들은 이 페이지에서만 className 으로 참조된다.
+   ============================================================ */
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.anim-fade-up { animation: fade-up 0.6s ease-out both; }
+
+.custom-scrollbar::-webkit-scrollbar { width: 5px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 3px; }
+
+.glass-nav {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.photo-placeholder {
+  background: linear-gradient(135deg, #e2e8f0 0%, #f1f5f9 100%);
+  display: flex; align-items: center; justify-content: center;
+  color: #94a3b8; font-size: 13px; font-weight: 600;
+}

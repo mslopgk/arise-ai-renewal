@@ -13,6 +13,9 @@ import BymonologHubPage from './variants/bymonolog/hub/page.jsx';
 import BymonologGradPage from './variants/bymonolog/grad/page.jsx';
 import BymonologAuraPage from './variants/bymonolog/aura/page.jsx';
 
+// Google variant (PNU × Google AI Ecosystem)
+import GooglePage from './variants/google/page.jsx';
+
 // Datarooms
 import Regional from './datarooms/Regional.jsx';
 import Comparison from './datarooms/Comparison.jsx';
@@ -44,6 +47,9 @@ export default function App() {
       <Route path="/bymonolog/hub" element={<BymonologHubPage />} />
       <Route path="/bymonolog/grad" element={<BymonologGradPage />} />
       <Route path="/bymonolog/aura" element={<BymonologAuraPage />} />
+
+      {/* Google variant */}
+      <Route path="/google" element={<GooglePage />} />
 
       {/* Datarooms */}
       <Route path="/dataroom/regional" element={<Regional />} />
