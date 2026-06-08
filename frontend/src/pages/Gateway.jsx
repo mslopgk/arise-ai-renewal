@@ -1,8 +1,20 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { SpeakerHigh, SpeakerSlash } from '@phosphor-icons/react';
 import './gateway.css';
 
 export default function Gateway() {
+  // 소개 영상: 정책상 음소거로 자동재생 → 영상 위 "소리 켜기" 버튼으로 토글.
+  const videoRef = useRef(null);
+  const [muted, setMuted] = useState(true);
+  const toggleMute = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.muted = !v.muted;
+    v.play().catch(() => {});
+    setMuted(v.muted);
+  };
+
   return (
     <div className="gateway-container">
       <div className="gateway-wrap">
@@ -18,16 +30,38 @@ export default function Gateway() {
 
         {/* Hero Content Area */}
         <div className="gateway-box">
-          <div className="gateway-video">
-            <video 
-              muted 
-              autoPlay 
-              loop 
-              playsInline 
-              preload="auto" 
-              src="/media/pnu80-intro.mp4" 
+          <div className="gateway-video" style={{ position: 'relative' }}>
+            <video
+              ref={videoRef}
+              muted
+              autoPlay
+              loop
+              playsInline
+              preload="auto"
+              src="/video/arise-main.mp4"
               aria-label="부산대학교 소개 영상"
             />
+            <button
+              type="button"
+              onClick={toggleMute}
+              aria-label={muted ? '소리 켜기' : '음소거'}
+              style={{
+                position: 'absolute', right: 14, bottom: 14, zIndex: 5,
+                display: 'inline-flex', alignItems: 'center', gap: 7,
+                padding: muted ? '9px 14px 9px 12px' : '9px',
+                borderRadius: 999, cursor: 'pointer',
+                background: 'rgba(0,0,0,0.55)', color: '#fff',
+                border: '1px solid rgba(255,255,255,0.28)',
+                backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)',
+                fontSize: 13, fontWeight: 700, lineHeight: 1,
+                boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
+              }}
+            >
+              {muted
+                ? <SpeakerSlash size={18} weight="fill" aria-hidden />
+                : <SpeakerHigh size={18} weight="fill" aria-hidden />}
+              {muted && <span>소리 켜기</span>}
+            </button>
           </div>
 
           <ul className="gateway-right" id="main">

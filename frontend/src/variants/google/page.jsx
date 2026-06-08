@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import ceremonyImg from '/google/partnership-ceremony.jpg';
 import {
   Menu, X, Mail, ChevronRight, BookOpen, Award, Users,
@@ -56,6 +56,21 @@ export default function GooglePartnership() {
   const [registerModal, setRegisterModal] = useState(null); // 'student' | 'faculty' | null
   const [facultyStep, setFacultyStep] = useState('check'); // 'check' | 'method1' | 'method2'
   const [agreedNotice, setAgreedNotice] = useState(false);
+
+  // 홍보 영상: 화면 안이면 자동재생(가능하면 소리 포함, 브라우저가 막으면 음소거로 폴백),
+  // 화면 밖이면 일시정지, 재진입 시 재생 재개.
+  const promoVideoRef = useRef(null);
+  useEffect(() => {
+    const v = promoVideoRef.current;
+    if (!v) return;
+    const tryPlay = () => v.play().catch(() => { v.muted = true; v.play().catch(() => {}); });
+    const io = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) tryPlay(); else v.pause(); },
+      { threshold: 0.25 }
+    );
+    io.observe(v);
+    return () => io.disconnect();
+  }, []);
 
   const go = (id) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
@@ -394,15 +409,21 @@ export default function GooglePartnership() {
 
           {/* Video */}
           <div className="max-w-4xl mx-auto pb-8 anim-fade-up" style={{ animationDelay: '0.15s' }}>
-            <div className="bg-gray-900 rounded-2xl shadow-2xl shadow-black/30 overflow-hidden relative group aspect-video flex items-center justify-center ring-1 ring-white/10">
-              <div className="absolute inset-0 bg-cover bg-center opacity-30" style={{ backgroundImage: "url('/google/hero-bg.jpg')" }}></div>
-              <div className="relative text-center z-10">
-                <div className="w-20 h-20 bg-white/10 backdrop-blur-sm text-white rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:bg-white/20 transition-all duration-300 cursor-pointer ring-1 ring-white/20">
-                  <Play className="w-8 h-8 fill-white text-white ml-1" />
-                </div>
-                <p className="text-white/90 font-semibold text-lg">부산대 X 구글 파트너십 홍보 영상</p>
-                <p className="text-white/30 text-sm mt-1">Presented by 에듀테크센터</p>
-              </div>
+            <div className="bg-gray-900 rounded-2xl shadow-2xl shadow-black/30 overflow-hidden relative aspect-video ring-1 ring-white/10">
+              <video
+                ref={promoVideoRef}
+                className="absolute inset-0 w-full h-full object-cover"
+                controls
+                loop
+                playsInline
+                preload="metadata"
+                poster="/google/hero-bg.jpg"
+                controlsList="nodownload noplaybackrate"
+                disablePictureInPicture
+                aria-label="부산대 X 구글 파트너십 홍보 영상"
+              >
+                <source src="/google/pnu-google.mp4" type="video/mp4" />
+              </video>
             </div>
           </div>
 

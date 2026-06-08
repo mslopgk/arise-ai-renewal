@@ -7,6 +7,19 @@ import { overview, heroVideo } from "@/lib/content";
 
 export default function Hero() {
   const root = useRef(null);
+  const videoRef = useRef(null);
+
+  // 배경 영상: 화면 안에서만 재생(이탈 시 일시정지, 재진입 시 재개). 무음이라 자동재생 OK.
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    const io = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) v.play().catch(() => {}); else v.pause(); },
+      { threshold: 0.2 }
+    );
+    io.observe(v);
+    return () => io.disconnect();
+  }, []);
 
   useEffect(() => {
     const reduced = window.matchMedia(
@@ -62,6 +75,7 @@ export default function Hero() {
     >
       {/* Cinematic background video — muted/looping behind the headline. */}
       <video
+        ref={videoRef}
         className="hero-video"
         autoPlay
         muted
