@@ -153,10 +153,10 @@ function DeptEditor({ initial, onSave, onDelete, onCancel }) {
           <label style={S.check}><input type="checkbox" checked={f.recruit} onChange={e => set('recruit', e.target.checked)} /> 모집함</label>
         </L>
         <L label="BK21">
-          <label style={S.check}><input type="checkbox" checked={f.bk21} onChange={e => set('bk21', e.target.checked)} /> 참여학과(★)</label>
+          <label style={S.check}><input type="checkbox" checked={f.bk21} onChange={e => { const on = e.target.checked; setF(p => ({ ...p, bk21: on, ...(on ? {} : { bk21_name: '', bk21_url: '' }) })); }} /> 참여학과(★)</label>
         </L>
-        <L label="BK21 사업단명"><input style={S.input} value={f.bk21_name} onChange={e => set('bk21_name', e.target.value)} /></L>
-        <L label="BK21 URL"><input style={S.input} value={f.bk21_url} onChange={e => set('bk21_url', e.target.value)} /></L>
+        <L label="BK21 사업단명"><input style={{ ...S.input, ...(f.bk21 ? {} : S.inputDisabled) }} value={f.bk21_name} disabled={!f.bk21} onChange={e => set('bk21_name', e.target.value)} placeholder={f.bk21 ? '' : '참여학과 체크 시 입력'} /></L>
+        <L label="BK21 URL"><input style={{ ...S.input, ...(f.bk21 ? {} : S.inputDisabled) }} value={f.bk21_url} disabled={!f.bk21} onChange={e => set('bk21_url', e.target.value)} placeholder={f.bk21 ? '' : '참여학과 체크 시 입력'} /></L>
       </div>
       <L label="소개"><textarea style={S.textarea} rows={3} value={f.intro} onChange={e => set('intro', e.target.value)} /></L>
       <L label="해시태그 (줄바꿈 또는 쉼표 구분, # 자동)"><textarea style={S.textarea} rows={3} value={f.hashtags} onChange={e => set('hashtags', e.target.value)} /></L>
@@ -271,6 +271,7 @@ const S = {
   field: { display: 'flex', flexDirection: 'column', gap: 5, marginBottom: 10 },
   label: { fontSize: 12, color: '#9a9aa2' },
   input: { background: '#0e0f13', border: '1px solid #3a3d48', borderRadius: 6, padding: '8px 10px', color: '#e8e8ea', fontSize: 14, width: '100%', boxSizing: 'border-box' },
+  inputDisabled: { background: '#16181f', color: '#5a5a62', borderColor: '#2a2d38', cursor: 'not-allowed' },
   select: { background: '#0e0f13', border: '1px solid #3a3d48', borderRadius: 6, padding: '8px 10px', color: '#e8e8ea', fontSize: 14, width: '100%', boxSizing: 'border-box' },
   textarea: { background: '#0e0f13', border: '1px solid #3a3d48', borderRadius: 6, padding: '8px 10px', color: '#e8e8ea', fontSize: 13, width: '100%', boxSizing: 'border-box', resize: 'vertical', fontFamily: 'inherit' },
   check: { display: 'inline-flex', alignItems: 'center', gap: 6, color: '#ccc', fontSize: 14 },
