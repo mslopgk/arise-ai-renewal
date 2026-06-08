@@ -4,8 +4,7 @@ import { useEffect, useState } from "react";
 
 import { Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
-import { ArrowUpRight } from "@phosphor-icons/react";
-import { brandAssets, overview, nav, qrLink } from "@/lib/content";
+import { brandAssets, overview, nav } from "@/lib/content";
 
 const ROOT = "/bymonolog";
 
@@ -81,16 +80,6 @@ export default function Nav() {
             );
           })}
         </ul>
-
-        <a
-          href={qrLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mono-pill mono-pill--solid shrink-0"
-        >
-          QR
-          <ArrowUpRight size={14} weight="bold" aria-hidden />
-        </a>
       </nav>
     </header>
   );
