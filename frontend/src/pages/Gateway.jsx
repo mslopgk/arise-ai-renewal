@@ -52,7 +52,7 @@ export default function Gateway() {
             <li>
               <Link className="gateway-btn google" to="/google">
                 <span className="num">02</span>
-                <strong>PNU × Google AI Eco System</strong>
+                <strong>PNU × Google for Education AI 교육혁신 파트너십</strong>
                 <span className="desc">Google과 함께하는 AI 교육·연구 협력</span>
                 <span className="btn-arrow"><span className="arrow-icon"></span></span>
               </Link>
