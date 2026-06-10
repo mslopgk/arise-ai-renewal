@@ -69,15 +69,23 @@ export default function Footer() {
         <span className="mono-label !text-[0.82rem]">CONTACT / 같이 더 높게</span>
 
         <div className="mt-8 grid gap-12 lg:grid-cols-[1.3fr_1fr]">
-          <div>
-            <h2 className="font-heavy text-5xl uppercase leading-[0.9] tracking-tight text-[var(--text)] sm:text-7xl md:text-8xl">
-              <span className="tw-nowrap">같이</span>
-              <br />
-              <span className="tw-nowrap">더 높게</span>
-            </h2>
-            <p className="mt-6 max-w-md text-balance text-base leading-relaxed text-[var(--muted)] md:text-lg">
-              {overview.org} · {overview.role}
-            </p>
+          <div className="flex h-full flex-col justify-between">
+            <div>
+              <h2 className="font-heavy text-5xl uppercase leading-[0.9] tracking-tight text-[var(--text)] sm:text-7xl md:text-8xl">
+                <span className="tw-nowrap">같이</span>
+                <br />
+                <span className="tw-nowrap">더 높게</span>
+              </h2>
+              <p className="mt-6 max-w-md text-balance text-base leading-relaxed text-[var(--muted)] md:text-lg">
+                {overview.org} · {overview.role}
+              </p>
+            </div>
+            <div className="mt-10 flex items-center gap-3">
+              <span className="h-px w-10 shrink-0 bg-[var(--gold)]" aria-hidden />
+              <span className="font-mono text-sm uppercase tracking-[0.18em] text-[var(--muted)]">
+                {overview.slogan}
+              </span>
+            </div>
           </div>
 
           <div className="flex flex-col">
