@@ -9,9 +9,8 @@ import {
   Phone,
   EnvelopeSimple,
   Clock,
-  ArrowUpRight,
 } from "@phosphor-icons/react";
-import { contact, overview, brandAssets, qrLink } from "@/lib/content";
+import { contact, overview, brandAssets } from "@/lib/content";
 
 const ROWS = [
   { Icon: MapPin, label: "주소", value: contact.address },
@@ -79,15 +78,6 @@ export default function Footer() {
             <p className="mt-6 max-w-md text-balance text-base leading-relaxed text-[var(--muted)] md:text-lg">
               {overview.org} · {overview.role}
             </p>
-            <a
-              href={qrLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mono-pill mono-pill--solid mt-8 !text-[0.8rem]"
-            >
-              <span className="tw-nowrap">{overview.slogan}</span>
-              <ArrowUpRight size={14} weight="bold" aria-hidden />
-            </a>
           </div>
 
           <div className="flex flex-col">

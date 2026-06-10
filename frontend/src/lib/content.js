@@ -550,7 +550,6 @@ export const contact = {
   phone: "051-510-0000",
   email: "arise@pusan.ac.kr",
   hours: "평일 09:00 ~ 18:00 (주말 및 공휴일 휴무)",
-  source: "https://inetguru.github.io/pnu_ai/",
 };
 
 /** Official PNU brand assets (in /public/pnu). Use these — never fabricate logos/wordmarks. */
@@ -572,8 +571,6 @@ export const nav = [
   { label: "구심점 확립", path: "/hub", star: false },
   { label: "A.U.R.A.", path: "/aura", star: true },
 ];
-
-export const qrLink = "https://inetguru.github.io/pnu_ai/";
 
 /** 최종 승인 변형 (다크 1). */
 export const variants = [
