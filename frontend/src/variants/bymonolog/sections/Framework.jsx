@@ -86,7 +86,7 @@ export default function Framework() {
               <span className="font-display text-xl font-extrabold tracking-tight text-[var(--gold)] md:text-2xl">
                 {t.value}
               </span>
-              <span className="mt-1.5 text-xs text-[var(--muted)]">
+              <span className="mt-1.5 text-xs text-[#b8b8b2]">
                 {t.label}
               </span>
             </div>
