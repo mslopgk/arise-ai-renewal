@@ -373,7 +373,7 @@ export default function Comparison() {
           background: #fff; margin: 14px; border-radius: 8px;
           box-shadow: 0 1px 4px rgba(0,0,0,0.08); padding: 16px 20px;
         }
-        .canvas-wrap { position: relative; width: 100%; }
+        .canvas-wrap { position: relative; width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
         
         .tooltip-card {
           position: fixed; display: none; background: rgba(20,20,40,0.92); color: #fff; padding: 10px 14px;
