@@ -24,7 +24,7 @@ export default function Gateway() {
           <img className="mark" src="/logos/pnu-symbol-color.jpg" alt="부산대학교" />
           <div>
             <h1>부산대학교 <span>AI 거점대학육성사업단</span></h1>
-            <div className="sub">A.U.R.A · Busan National University</div>
+            <div className="sub">A.U.R.A · Pusan National University</div>
           </div>
         </div>
 
