@@ -2565,13 +2565,13 @@
 
     function deptById(id){ return departments.find(function(x){ return String(x.id) === String(id); }); }
 
-    // ── 검색 매칭 ── (이름 + 전공명 + SAMPLE 해시태그)
+    // ── 검색 매칭 ── (이름 + 전공명 + 실제 표시 해시태그)
     function matchesQ(d){
       var q = state.q.trim().toLowerCase();
       if (!q) return true;
       var hay = (d.name + ' ' + (d.majors || []).map(function(m){ return m.name; }).join(' ')).toLowerCase();
-      var ex = SAMPLE[d.name];
-      if (ex && ex.hashtags) hay += ' ' + ex.hashtags.join(' ').toLowerCase();
+      var tags = enrich(d).hashtags;   // 화면에 표시되는 해시태그(실제 DB 우선, 없으면 SAMPLE)와 동일하게 검색
+      if (tags && tags.length) hay += ' ' + tags.join(' ').toLowerCase();
       return hay.indexOf(q) !== -1;
     }
 
