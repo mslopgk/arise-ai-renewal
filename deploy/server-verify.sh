@@ -17,9 +17,15 @@ for i in $(seq 1 20); do
   sleep 2
 done
 
-echo "=== local HTTP (:80) ==="
-for p in /health /api/departments / /s30/ /admission-v3-dark.html /login; do
-  code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 6 "http://localhost:80$p")
+echo "=== local HTTP (:80) — 리다이렉트 적용 후엔 전부 301이 정상 ==="
+for p in /health /; do
+  code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 6 -H 'Host: arise-ai.pusan.ac.kr' "http://localhost:80$p")
+  echo "  $p -> $code (기대 301)"
+done
+
+echo "=== local HTTPS (:443) ==="
+for p in /health /api/departments / /admission-v3-dark.html /login; do
+  code=$(curl -sk -o /dev/null -w "%{http_code}" --max-time 6 "https://localhost$p")
   echo "  $p -> $code"
 done
 
