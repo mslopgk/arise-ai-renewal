@@ -4,7 +4,7 @@
 
 ## 접근 제약 (중요)
 - **SSH(11097)는 화이트리스트된 IP에서만 접속 가능** — 일반 PC/외부망에선 timeout (2026-06-12 확인).
-- 화이트리스트 아닌 PC에서 작업해야 할 땐 자급자족 번들을 만들어 화이트리스트 PC에서 실행 — 예: `deploy/nginx-redirect-rollout/`.
+- 화이트리스트 아닌 PC에서 작업해야 할 땐 자급자족 번들을 만들어 화이트리스트 PC에서 실행 — 패턴 예시: `deploy/rollout-2026-06-12/` (bat 더블클릭 → scp → 백업 → 적용 → 검증 → 실패 시 자동 롤백).
 - 80/443은 부산대가 외부 포워딩 → 사이트 자체는 전세계 도달 가능. 서버는 폐쇄망(인터넷 불가)이라 이미지는 `docker load`로 반입.
 
 ## 현재 상태 (LIVE, 2026-06-12 확인)
@@ -18,23 +18,22 @@
   - ~~Let's Encrypt + acme.sh (HTTP-01 stateless)~~ → **폐기됨** (2026-06-08 와일드카드로 교체. acme 스크립트·:80 챌린지 location 불필요)
   - 참고: `pusan.ac.kr`은 브라우저 **HSTS preload** 도메인 — 도메인 접속은 항상 HTTPS로 강제되며, 유효 인증서가 필수(만료 시 우회 불가 전면 차단).
 - **Google OAuth: 설정 완료** — `/auth/google`이 Google로 302 (2026-06-12 확인). redirect URI `https://arise-ai.pusan.ac.kr/auth/google/callback`.
+- **HTTP(80) → HTTPS 301 강제 적용됨** (2026-06-12, 검증 완료: http→301 / https→200).
 - DB: PostgreSQL 마이그레이션·시드 완료. 볼륨 `pnug_pgdata`.
 
-## ⚠ 알려진 문제: 내부망 관리자 로그인 무한 루프 (2026-06-12 분석)
+## 해결된 문제: 내부망 관리자 로그인 무한 루프 (2026-06-12 분석·적용 완료)
 - **증상**: 부산대 내부망에서 관리자 로그인 → 다시 로그인창 무한 반복. 외부망에선 정상.
-- **원인**: prod에서 admin/OAuth 쿠키가 항상 `Secure`(backend/src/admin.js, auth.js)인데, 라이브 nginx가
-  **80 포트를 리다이렉트 없이 평문 서빙** 중. 내부 사용자가 `http://`(주로 IP 직접 접속)로 들어오면
+- **원인**: prod에서 admin/OAuth 쿠키가 항상 `Secure`(backend/src/admin.js, auth.js)인데, 당시 nginx가
+  **80 포트를 리다이렉트 없이 평문 서빙**. 내부 사용자가 `http://`(주로 IP 직접 접속)로 들어오면
   브라우저가 Secure 쿠키 저장을 거부 → 로그인 200이어도 세션 없음 → `/api/admin/me` 401 → 루프.
   외부는 HSTS preload 때문에 항상 HTTPS라 정상이었음.
-- **수정**: nginx 80→443 301 리다이렉트 적용 — 번들·절차: `deploy/nginx-redirect-rollout/README.md`.
-  canonical 설정: `deploy/nginx/conf.d/arise-ai.conf`.
-- **적용 전 필수 확인**: 교내 PC에서 `https://arise-ai.pusan.ac.kr`가 열리는지(교내 443 도달).
-  안 열리는 상태로 적용하면 내부 사용자가 사이트 전체 접속 불가가 됨.
-- **적용 후**: 내부 사용자는 도메인(`https://arise-ai.pusan.ac.kr`)으로 접속할 것. IP 접속은 인증서 경고.
+- **수정**: nginx 80→443 301 리다이렉트 적용 완료 — canonical 설정: `deploy/nginx/conf.d/arise-ai.conf`,
+  적용 번들(기록): `deploy/rollout-2026-06-12/`.
+- **운영 안내**: 내부 사용자는 도메인(`https://arise-ai.pusan.ac.kr`)으로 접속할 것. IP 접속은 인증서 경고(우회 가능).
+  ※ 향후 유사 작업 시 사전 확인: 교내에서 443이 닿는지 — 안 닿는 상태로 80을 막으면 내부 전체 불통이 됨.
 
 ## ⚠ 남은 것 (사용자 몫)
 1. **admin 시드 비밀번호 교체** — 2026-06-12 기준 아직 초기값 그대로 유효 확인됨. 교체 강력 권장.
-2. nginx 리다이렉트 적용 (위 참조 — 번들 준비됨, 미적용 상태).
 
 ## 자격증명 (서버 ~/pnug-stack/.env)
 - admin 계정: `admin` / `SiBwlZc81BAV0TtB` (시드값 — **교체 권장**, 위 참조)
@@ -61,9 +60,9 @@ DB 접속: `docker compose exec postgres psql -U pnug -d pnug`
 2. `docker save pnug-was:latest | gzip > images.tar.gz`
 3. scp(포트 11097)로 서버 `~/pnug-deploy/` 반입 → `docker load -i images.tar.gz` → `cd ~/pnug-stack && docker compose up -d`
    - was 컨테이너만 recreate되는 무중단 배포(2026-06-08 검증). `down` 불필요. DB·nginx 보존.
-   - 참고 스크립트: `deploy/push-deploy.sh`, `deploy/server-install.sh`
+   - 화이트리스트 PC용 원클릭 패턴: `deploy/rollout-2026-06-12/apply.bat` 참고 (이미지를 폴더에 두면 자동 감지·적재)
 ### nginx 설정만 변경
-- `deploy/nginx-redirect-rollout/` 방식(scp + 백업 + nginx -t + reload + 자동 롤백). 이미지 재빌드 불필요.
+- `deploy/rollout-2026-06-12/` 방식(scp + 백업 + nginx -t + reload + 자동 롤백). 이미지 재빌드 불필요.
 - 레포 canonical(`deploy/nginx/conf.d/arise-ai.conf`)과 서버 적용본을 항상 동기화할 것.
 
 ## 파일 위치
@@ -71,6 +70,7 @@ DB 접속: `docker compose exec postgres psql -U pnug -d pnug`
 - 레포: `deploy/` — compose 참고본·nginx conf(canonical)·검증 스크립트(`server-verify.sh`, `validate-stack.sh`, `smoke.mjs`)·self-signed placeholder 인증서(`certs/`, 로컬 검증용)
 
 ## 변경 이력
+- 2026-06-12: nginx 301·디렉터리 정리 **라이브 적용 완료**(통합 번들 실행, 검증 통과). 일회성 스크립트(remediate-live, verify-migration, run-install)·구식 compose(prod.yml)·중복 단독 번들 2종 삭제.
 - 2026-06-12: 학과 디렉터리에서 협동과정·계약학과 제거(학석박사 연계과정 신청 불가 — 대학원혁신실 회신) — 라이브 DB 정리 번들 `deploy/dept-cleanup-rollout/` + 시드 JSON·관리자 드롭다운 정리.
 - 2026-06-12: 문서 현행화(와일드카드 인증서·OAuth 완료·접근 제약 반영, acme 절차 폐기 표기). 내부망 로그인 루프 분석·수정 번들 추가.
 - 2026-06-08: TLS를 Let's Encrypt → 부산대 와일드카드로 교체. was 이미지 self-contained 전환(s30 bind-mount 제거).
