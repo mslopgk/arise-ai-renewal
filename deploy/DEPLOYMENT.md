@@ -32,11 +32,8 @@
 - **운영 안내**: 내부 사용자는 도메인(`https://arise-ai.pusan.ac.kr`)으로 접속할 것. IP 접속은 인증서 경고(우회 가능).
   ※ 향후 유사 작업 시 사전 확인: 교내에서 443이 닿는지 — 안 닿는 상태로 80을 막으면 내부 전체 불통이 됨.
 
-## ⚠ 남은 것 (사용자 몫)
-1. **admin 시드 비밀번호 교체** — 2026-06-12 기준 아직 초기값 그대로 유효 확인됨. 교체 강력 권장.
-
 ## 자격증명 (서버 ~/pnug-stack/.env)
-- admin 계정: `admin` / `SiBwlZc81BAV0TtB` (시드값 — **교체 권장**, 위 참조)
+- admin 계정: `admin` / `SiBwlZc81BAV0TtB` (시드값 — 2026-06-12 유지 결정)
 - PostgreSQL: `pnug` / `6k4P06iXKBHQwlarsoyWBJPA` (DB `pnug`)
 - SSH: `ubuntu` 계정, 키 인증(2026-06-08 등록) 또는 비밀번호 — sudo 비번 동일. JWT_SECRET 등은 `.env` 참조. **이 파일은 git 커밋 금지.**
 
