@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 
-const GYE = ['인문·사회', '자연과학', '공학', '예술', '체육', '의학', '협동과정', '계약학과'];
+// 협동과정·계약학과는 학석박사 연계과정 신청 불가(대학원혁신실 회신, 2026-06-12)로 디렉터리에서 제외
+const GYE = ['인문·사회', '자연과학', '공학', '예술', '체육', '의학'];
 const api = (url, opts = {}) =>
   fetch(url, { credentials: 'include', headers: { 'Content-Type': 'application/json' }, ...opts });
 
