@@ -67,6 +67,7 @@ DB 접속: `docker compose exec postgres psql -U pnug -d pnug`
 - 레포: `deploy/` — compose 참고본·nginx conf(canonical)·검증 스크립트(`server-verify.sh`, `validate-stack.sh`, `smoke.mjs`)·self-signed placeholder 인증서(`certs/`, 로컬 검증용)
 
 ## 변경 이력
+- 2026-06-17: 「학과 정보 수정 신청」 2차 — **공개 제출(로그인 제거)·디렉터리 진입 FAB·학과/세부전공 삭제 요청 기능** 라이브 배포. `dir_change_requests`에 `action`·`note` 컬럼 추가(부팅 시 `ALTER ... IF NOT EXISTS`로 기존 테이블 호환). 검증: was healthy·공개 제출 422 검증·삭제 사유 필수·FAB/문구 라이브 반영. (코드 커밋 114c99c)
 - 2026-06-17: 「학과 정보 수정 신청」 기능 **라이브 배포 완료**. 신규 페이지 `/dept-edit-request`(@pusan.ac.kr OAuth 게이트) + 관리자 "학과 수정 신청" 검토 탭(승인 시 디렉터리 자동 반영). DB `dir_change_requests` 테이블 추가(`initSchema` 자동 생성 — 무중단 was 재생성, postgres·nginx·DB볼륨 보존). 디렉터리 안내 문구 2곳 수정(대제목 하단·검색창 옆 칩). 검증: was healthy·문구 반영·제출/관리자 API 정상. (코드 커밋 e7361b6)
 - 2026-06-12: nginx 301·디렉터리 정리 **라이브 적용 완료**(통합 번들 실행, 검증 통과). 일회성 스크립트(remediate-live, verify-migration, run-install)·구식 compose(prod.yml)·중복 단독 번들 2종 삭제.
 - 2026-06-12: 학과 디렉터리에서 협동과정·계약학과 제거(학석박사 연계과정 신청 불가 — 대학원혁신실 회신) — 라이브 DB 정리 번들 `deploy/dept-cleanup-rollout/` + 시드 JSON·관리자 드롭다운 정리.
