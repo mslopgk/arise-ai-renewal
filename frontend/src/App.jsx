@@ -6,6 +6,7 @@ import Gateway from './pages/Gateway.jsx';
 import Login from './pages/Login.jsx';
 import AdminLogin from './pages/AdminLogin.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx';
+import DeptEditRequest from './pages/DeptEditRequest.jsx';
 
 // Bymonolog variant
 import BymonologPage from './variants/bymonolog/page.jsx';
@@ -41,6 +42,9 @@ export default function App() {
 
       {/* Auth / Login */}
       <Route path="/login" element={<Login />} />
+
+      {/* 학과 정보 수정 신청 (학과 관계자 — OAuth 게이트) */}
+      <Route path="/dept-edit-request" element={<DeptEditRequest />} />
 
       {/* Bymonolog routes */}
       <Route path="/bymonolog" element={<BymonologPage />} />

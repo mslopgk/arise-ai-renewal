@@ -180,6 +180,34 @@ export async function initSchema() {
       image_data bytea
     );
     CREATE INDEX IF NOT EXISTS idx_dir_maj_dept ON dir_majors(dept_id);
+
+    -- === 학과 정보 수정 신청 (학과 관계자 제출 → 관리자 검토 큐 → 승인 시 디렉터리 반영) ===
+    CREATE TABLE IF NOT EXISTS dir_change_requests (
+      id SERIAL PRIMARY KEY,
+      created_at timestamptz DEFAULT now(),
+      status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','approved','rejected')),
+      submitter_email TEXT,          -- OAuth 검증 이메일
+      applicant_name TEXT,           -- 신청자명 (메타)
+      affiliation TEXT,              -- 소속 (메타)
+      ext_phone TEXT,                -- 내선전화번호 (메타)
+      target_level TEXT NOT NULL DEFAULT 'dept' CHECK (target_level IN ('dept','major')),
+      dept_id INTEGER,               -- 기존 학과 선택 id (NULL=신규 학과). FK 없음(요청 이력 보존).
+      major_id INTEGER,              -- 기존 세부전공 선택 id (NULL=신규/해당없음)
+      gyeyeol TEXT,
+      dept_name TEXT,
+      major_name TEXT,
+      intro TEXT,
+      location TEXT,
+      phone TEXT,
+      homepage TEXT,
+      bk21_url TEXT,                 -- 채워지면 반영 시 bk21=1
+      image_mime TEXT,
+      image_data bytea,
+      reviewed_at timestamptz,
+      reviewed_by INTEGER,           -- 검토 관리자 id
+      reject_reason TEXT
+    );
+    CREATE INDEX IF NOT EXISTS idx_dir_chreq_status ON dir_change_requests(status, created_at DESC);
   `);
 }
 
@@ -256,4 +284,139 @@ export async function getDeptImage(deptId) {
 }
 export async function getMajorImage(majorId) {
   return await prepare('SELECT image_mime, image_data FROM dir_majors WHERE id = ?').get(majorId);
+}
+
+// === 학과 정보 수정 신청 ===
+export const MAX_REQ_IMG = 2 * 1024 * 1024; // 2MB
+
+// data:image/...;base64,.... → { mime, buf } | null
+export function parseImageDataUrl(dataUrl) {
+  const m = /^data:([\w/+.-]+);base64,(.+)$/s.exec(dataUrl || '');
+  if (!m) return null;
+  return { mime: m[1], buf: Buffer.from(m[2], 'base64') };
+}
+
+const CHREQ_COLS = `id, created_at, status, submitter_email, applicant_name, affiliation, ext_phone,
+  target_level, dept_id, major_id, gyeyeol, dept_name, major_name,
+  intro, location, phone, homepage, bk21_url,
+  (image_data IS NOT NULL) AS has_image, reviewed_at, reviewed_by, reject_reason`;
+
+export async function createChangeRequest(d) {
+  const row = await prepare(`
+    INSERT INTO dir_change_requests
+      (submitter_email, applicant_name, affiliation, ext_phone, target_level,
+       dept_id, major_id, gyeyeol, dept_name, major_name,
+       intro, location, phone, homepage, bk21_url, image_mime, image_data)
+    VALUES (?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?) RETURNING id
+  `).get(
+    d.submitter_email || null, d.applicant_name || null, d.affiliation || null, d.ext_phone || null,
+    d.target_level === 'major' ? 'major' : 'dept',
+    d.dept_id ?? null, d.major_id ?? null, d.gyeyeol || null, d.dept_name || null, d.major_name || null,
+    d.intro || null, d.location || null, d.phone || null, d.homepage || null, d.bk21_url || null,
+    d.image_mime || null, d.image_data || null,
+  );
+  return row.id;
+}
+
+export async function listChangeRequests(status) {
+  const filter = status && status !== 'all';
+  return await prepare(`
+    SELECT ${CHREQ_COLS} FROM dir_change_requests
+    ${filter ? 'WHERE status = ?' : ''}
+    ORDER BY (status = 'pending') DESC, created_at DESC
+  `).all(...(filter ? [status] : []));
+}
+
+export async function getChangeRequest(id) {
+  return await prepare(`SELECT ${CHREQ_COLS} FROM dir_change_requests WHERE id = ?`).get(id);
+}
+
+export async function getChangeRequestImage(id) {
+  return await prepare('SELECT image_mime, image_data FROM dir_change_requests WHERE id = ?').get(id);
+}
+
+export async function countPendingChangeRequests() {
+  const r = await prepare(`SELECT count(*)::int n FROM dir_change_requests WHERE status = 'pending'`).get();
+  return r ? r.n : 0;
+}
+
+// UPDATE 시 값이 채워진 필드만 SET (빈 항목은 기존값 유지). extra는 무조건 포함.
+function buildSet(fields, extra = {}) {
+  const cols = [], vals = [];
+  for (const [k, v] of Object.entries(fields)) {
+    if (v != null && String(v).trim() !== '') { cols.push(`${k}=?`); vals.push(v); }
+  }
+  for (const [k, v] of Object.entries(extra)) { cols.push(`${k}=?`); vals.push(v); }
+  return { cols, vals };
+}
+
+// 신청 승인 → 디렉터리에 자동 반영(원자적). 반환: { ok, dept_id?, major_id?, error? }
+export async function approveChangeRequest(id, adminId) {
+  return await tx(async (t) => {
+    const r = await t.get('SELECT * FROM dir_change_requests WHERE id = ?', id);
+    if (!r) return { ok: false, error: 'not_found' };
+    if (r.status !== 'pending') return { ok: false, error: 'not_pending' };
+
+    const hasBk = r.bk21_url && String(r.bk21_url).trim() !== '';
+    const bkExtra = hasBk ? { bk21: 1, bk21_url: r.bk21_url } : {};
+    let deptId = r.dept_id, majorId = r.major_id;
+
+    if (r.target_level === 'dept') {
+      // 내용 필드 + 학과명/계열을 학과 레코드에 반영
+      if (deptId) {
+        const exist = await t.get('SELECT id FROM dir_departments WHERE id = ?', deptId);
+        if (!exist) return { ok: false, error: 'dept_not_found' };
+        const { cols, vals } = buildSet(
+          { gyeyeol: r.gyeyeol, name: r.dept_name, intro: r.intro, location: r.location, phone: r.phone, homepage: r.homepage },
+          bkExtra
+        );
+        if (cols.length) await t.run(`UPDATE dir_departments SET ${cols.join(',')} WHERE id=?`, ...vals, deptId);
+      } else {
+        const ins = await t.get(
+          `INSERT INTO dir_departments (gyeyeol,name,intro,location,phone,homepage,bk21,bk21_url)
+           VALUES (?,?,?,?,?,?,?,?) RETURNING id`,
+          r.gyeyeol || '', r.dept_name || '', r.intro || null, r.location || null,
+          r.phone || null, r.homepage || null, hasBk ? 1 : 0, hasBk ? r.bk21_url : null,
+        );
+        deptId = ins.id;
+      }
+      if (r.image_data) await t.run('UPDATE dir_departments SET image_mime=?, image_data=? WHERE id=?', r.image_mime, r.image_data, deptId);
+    } else {
+      // 세부전공 레벨 — 학과는 컨테이너(없으면 계열+학과명으로 생성), 내용은 전공 레코드에 반영
+      if (!deptId) {
+        const ins = await t.get('INSERT INTO dir_departments (gyeyeol,name) VALUES (?,?) RETURNING id', r.gyeyeol || '', r.dept_name || '');
+        deptId = ins.id;
+      }
+      if (majorId) {
+        const exist = await t.get('SELECT id FROM dir_majors WHERE id=? AND dept_id=?', majorId, deptId);
+        if (!exist) return { ok: false, error: 'major_not_found' };
+        const { cols, vals } = buildSet(
+          { name: r.major_name, intro: r.intro, location: r.location, phone: r.phone, homepage: r.homepage },
+          bkExtra
+        );
+        if (cols.length) await t.run(`UPDATE dir_majors SET ${cols.join(',')} WHERE id=?`, ...vals, majorId);
+        if (r.image_data) await t.run('UPDATE dir_majors SET image_mime=?, image_data=? WHERE id=?', r.image_mime, r.image_data, majorId);
+      } else {
+        const ins = await t.get(
+          `INSERT INTO dir_majors (dept_id,name,intro,location,phone,homepage,bk21,bk21_url,image_mime,image_data)
+           VALUES (?,?,?,?,?,?,?,?,?,?) RETURNING id`,
+          deptId, r.major_name || '', r.intro || null, r.location || null, r.phone || null, r.homepage || null,
+          hasBk ? 1 : 0, hasBk ? r.bk21_url : null, r.image_data ? r.image_mime : null, r.image_data || null,
+        );
+        majorId = ins.id;
+      }
+    }
+
+    await t.run("UPDATE dir_change_requests SET status='approved', reviewed_at=now(), reviewed_by=? WHERE id=?", adminId, id);
+    return { ok: true, dept_id: deptId, major_id: majorId };
+  });
+}
+
+export async function rejectChangeRequest(id, adminId, reason) {
+  const r = await prepare('SELECT status FROM dir_change_requests WHERE id = ?').get(id);
+  if (!r) return { ok: false, error: 'not_found' };
+  if (r.status !== 'pending') return { ok: false, error: 'not_pending' };
+  await prepare("UPDATE dir_change_requests SET status='rejected', reviewed_at=now(), reviewed_by=?, reject_reason=? WHERE id=?")
+    .run(adminId, reason || null, id);
+  return { ok: true };
 }

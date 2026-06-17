@@ -1,7 +1,7 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { db } from './db.js';
+import { db, listChangeRequests, getChangeRequest, getChangeRequestImage, countPendingChangeRequests, approveChangeRequest, rejectChangeRequest } from './db.js';
 import { mirrorResponseToSheet, getSheetStatus } from './sheets.js';
 
 const router = express.Router();
@@ -280,6 +280,49 @@ router.put('/departments/:id/majors/:mid', requireAdmin, async (req, res) => {
 router.delete('/departments/:id/majors/:mid', requireAdmin, async (req, res) => {
   await db.prepare('DELETE FROM dir_majors WHERE id=? AND dept_id=?').run(req.params.mid, req.params.id);
   res.status(204).end();
+});
+
+// === 학과 정보 수정 신청 — 검토 큐 (관리자 전용) ===
+router.get('/dir-change-requests', requireAdmin, async (req, res) => {
+  const status = typeof req.query.status === 'string' ? req.query.status : 'all';
+  const requests = await listChangeRequests(status);
+  res.json({ requests, pending_count: await countPendingChangeRequests() });
+});
+
+router.get('/dir-change-requests/:id', requireAdmin, async (req, res) => {
+  const r = await getChangeRequest(req.params.id);
+  if (!r) return res.status(404).json({ error: 'not_found' });
+  res.json({ request: r });
+});
+
+router.get('/dir-change-requests/:id/image', requireAdmin, async (req, res) => {
+  try {
+    const row = await getChangeRequestImage(req.params.id);
+    if (!row || !row.image_data) return res.status(404).end();
+    res.set('Content-Type', row.image_mime || 'image/jpeg');
+    res.set('Cache-Control', 'no-cache');
+    res.send(row.image_data);
+  } catch { res.status(500).end(); }
+});
+
+// 승인 → 디렉터리 자동 반영
+router.post('/dir-change-requests/:id/approve', requireAdmin, async (req, res) => {
+  try {
+    const result = await approveChangeRequest(Number(req.params.id), req.admin.id);
+    if (!result.ok) return res.status(result.error === 'not_found' ? 404 : 409).json({ error: result.error });
+    res.json(result);
+  } catch (e) {
+    console.error('[chreq approve] failed:', e.message);
+    res.status(500).json({ error: 'internal' });
+  }
+});
+
+// 반려
+router.post('/dir-change-requests/:id/reject', requireAdmin, async (req, res) => {
+  const reason = typeof req.body?.reason === 'string' ? req.body.reason.slice(0, 1000) : null;
+  const result = await rejectChangeRequest(Number(req.params.id), req.admin.id, reason);
+  if (!result.ok) return res.status(result.error === 'not_found' ? 404 : 409).json({ error: result.error });
+  res.json(result);
 });
 
 export default router;

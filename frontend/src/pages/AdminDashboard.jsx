@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import DeptDirectoryAdmin from './DeptDirectoryAdmin.jsx';
+import DeptChangeRequestsAdmin from './DeptChangeRequestsAdmin.jsx';
 
 const COLORS = ['#3672b8', '#5d9cd5', '#88c1eb', '#b8d9f2', '#dcebf8'];
 
@@ -11,7 +12,8 @@ export default function AdminDashboard() {
   const [me, setMe] = useState(null);
   const [error, setError] = useState(null);
   const [syncing, setSyncing] = useState(false);
-  const [view, setView] = useState('stats'); // 'stats' | 'directory'
+  const [view, setView] = useState('stats'); // 'stats' | 'directory' | 'requests'
+  const [chreqPending, setChreqPending] = useState(0);
 
   useEffect(() => {
     (async () => {
@@ -19,6 +21,10 @@ export default function AdminDashboard() {
       if (!meRes.ok) { navigate('/admin/login'); return; }
       const meData = await meRes.json();
       setMe(meData.admin);
+      fetch('/api/admin/dir-change-requests?status=pending', { credentials: 'include' })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => d && setChreqPending(d.pending_count || 0))
+        .catch(() => {});
       await loadStats();
     })();
   }, [navigate]);
@@ -72,9 +78,13 @@ export default function AdminDashboard() {
       <div style={styles.tabs}>
         <button onClick={() => setView('stats')} style={{ ...styles.tab, ...(view === 'stats' ? styles.tabActive : {}) }}>신청 현황</button>
         <button onClick={() => setView('directory')} style={{ ...styles.tab, ...(view === 'directory' ? styles.tabActive : {}) }}>학과 디렉터리 관리</button>
+        <button onClick={() => setView('requests')} style={{ ...styles.tab, ...(view === 'requests' ? styles.tabActive : {}) }}>
+          학과 수정 신청{chreqPending > 0 && <span style={styles.tabBadge}>{chreqPending}</span>}
+        </button>
       </div>
 
       {view === 'directory' && <DeptDirectoryAdmin />}
+      {view === 'requests' && <DeptChangeRequestsAdmin onPendingChange={setChreqPending} />}
 
       {view === 'stats' && error && <div style={styles.error}>{error}</div>}
 
@@ -205,4 +215,5 @@ const styles = {
   tabs: { display:'flex', gap:8, marginBottom:18 },
   tab: { background:'transparent', color:'#aaa', border:'1px solid #2a2d38', padding:'8px 16px', borderRadius:8, cursor:'pointer', fontSize:14, fontWeight:600 },
   tabActive: { background:'#23262f', color:'#fff', borderColor:'#3a3d48' },
+  tabBadge: { display:'inline-block', marginLeft:8, minWidth:18, padding:'1px 6px', borderRadius:999, background:'#ffb800', color:'#000', fontSize:11, fontWeight:700, textAlign:'center' },
 };

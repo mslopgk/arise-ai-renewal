@@ -10,6 +10,7 @@ import { initSchema, seedDirectoryIfEmpty, getDirectoryTree, getDeptImage, getMa
 import authRouter from './auth.js';
 import surveysRouter from './surveys.js';
 import adminRouter from './admin.js';
+import dirRequestsRouter from './dir-requests.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -59,6 +60,7 @@ app.use((req, res, next) => {
 app.use('/auth', authRouter);
 app.use('/api/surveys', surveysRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/dir-change-requests', dirRequestsRouter);
 
 // 학과 디렉터리 (공개 — 인증 불필요). DB에서 조립해 반환(관리자 편집 즉시 반영).
 app.get('/api/departments', async (req, res) => {
