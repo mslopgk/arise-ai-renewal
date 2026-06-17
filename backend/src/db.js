@@ -186,7 +186,8 @@ export async function initSchema() {
       id SERIAL PRIMARY KEY,
       created_at timestamptz DEFAULT now(),
       status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','approved','rejected')),
-      submitter_email TEXT,          -- OAuth 검증 이메일
+      action TEXT NOT NULL DEFAULT 'upsert' CHECK (action IN ('upsert','delete')),  -- 수정·추가 / 삭제 요청
+      submitter_email TEXT,          -- OAuth 검증 이메일(현재 공개 제출이라 NULL)
       applicant_name TEXT,           -- 신청자명 (메타)
       affiliation TEXT,              -- 소속 (메타)
       ext_phone TEXT,                -- 내선전화번호 (메타)
@@ -205,9 +206,13 @@ export async function initSchema() {
       image_data bytea,
       reviewed_at timestamptz,
       reviewed_by INTEGER,           -- 검토 관리자 id
-      reject_reason TEXT
+      reject_reason TEXT,
+      note TEXT                      -- 신청자 메모(삭제 사유 등)
     );
     CREATE INDEX IF NOT EXISTS idx_dir_chreq_status ON dir_change_requests(status, created_at DESC);
+    -- 기존 설치 호환(컬럼 추가)
+    ALTER TABLE dir_change_requests ADD COLUMN IF NOT EXISTS action TEXT NOT NULL DEFAULT 'upsert';
+    ALTER TABLE dir_change_requests ADD COLUMN IF NOT EXISTS note TEXT;
   `);
 }
 
@@ -296,24 +301,25 @@ export function parseImageDataUrl(dataUrl) {
   return { mime: m[1], buf: Buffer.from(m[2], 'base64') };
 }
 
-const CHREQ_COLS = `id, created_at, status, submitter_email, applicant_name, affiliation, ext_phone,
+const CHREQ_COLS = `id, created_at, status, action, submitter_email, applicant_name, affiliation, ext_phone,
   target_level, dept_id, major_id, gyeyeol, dept_name, major_name,
-  intro, location, phone, homepage, bk21_url,
+  intro, location, phone, homepage, bk21_url, note,
   (image_data IS NOT NULL) AS has_image, reviewed_at, reviewed_by, reject_reason`;
 
 export async function createChangeRequest(d) {
   const row = await prepare(`
     INSERT INTO dir_change_requests
-      (submitter_email, applicant_name, affiliation, ext_phone, target_level,
+      (action, submitter_email, applicant_name, affiliation, ext_phone, target_level,
        dept_id, major_id, gyeyeol, dept_name, major_name,
-       intro, location, phone, homepage, bk21_url, image_mime, image_data)
-    VALUES (?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?) RETURNING id
+       intro, location, phone, homepage, bk21_url, image_mime, image_data, note)
+    VALUES (?,?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?) RETURNING id
   `).get(
+    d.action === 'delete' ? 'delete' : 'upsert',
     d.submitter_email || null, d.applicant_name || null, d.affiliation || null, d.ext_phone || null,
     d.target_level === 'major' ? 'major' : 'dept',
     d.dept_id ?? null, d.major_id ?? null, d.gyeyeol || null, d.dept_name || null, d.major_name || null,
     d.intro || null, d.location || null, d.phone || null, d.homepage || null, d.bk21_url || null,
-    d.image_mime || null, d.image_data || null,
+    d.image_mime || null, d.image_data || null, d.note || null,
   );
   return row.id;
 }
@@ -356,6 +362,19 @@ export async function approveChangeRequest(id, adminId) {
     const r = await t.get('SELECT * FROM dir_change_requests WHERE id = ?', id);
     if (!r) return { ok: false, error: 'not_found' };
     if (r.status !== 'pending') return { ok: false, error: 'not_pending' };
+
+    // 삭제 요청 — 대상 레코드 제거(학과 삭제는 소속 세부전공 cascade)
+    if (r.action === 'delete') {
+      if (r.major_id) {
+        await t.run('DELETE FROM dir_majors WHERE id=?', r.major_id);
+      } else if (r.dept_id) {
+        await t.run('DELETE FROM dir_departments WHERE id=?', r.dept_id);
+      } else {
+        return { ok: false, error: 'delete_target_missing' };
+      }
+      await t.run("UPDATE dir_change_requests SET status='approved', reviewed_at=now(), reviewed_by=? WHERE id=?", adminId, id);
+      return { ok: true, deleted: true, dept_id: r.dept_id, major_id: r.major_id };
+    }
 
     const hasBk = r.bk21_url && String(r.bk21_url).trim() !== '';
     const bkExtra = hasBk ? { bk21: 1, bk21_url: r.bk21_url } : {};

@@ -3398,6 +3398,44 @@
 })();
 </script>
 
+<!-- ===== 학과 정보 수정 신청 FAB (학과 관계자용 → /dept-edit-request) ===== -->
+<style>
+  .dr-fab{
+    position:fixed; right:24px; bottom:86px; z-index:121;
+    display:inline-flex; align-items:center; gap:10px;
+    height:50px; padding:0 20px 0 16px;
+    font-family:var(--sans); font-weight:700; font-size:14px; letter-spacing:-.01em;
+    color:var(--amber); text-decoration:none; -webkit-tap-highlight-color:transparent;
+    background:linear-gradient(180deg, rgba(20,20,24,.92), rgba(11,11,14,.94));
+    border:1px solid rgba(255,184,0,.42); border-radius:999px;
+    -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);
+    box-shadow:0 12px 32px rgba(0,0,0,.5);
+    cursor:pointer; opacity:0; transform:translateY(16px);
+    animation:fb-in .6s cubic-bezier(.22,1,.36,1) 1.15s forwards;
+    transition:transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s ease, background .2s, color .2s, border-color .2s;
+  }
+  .dr-fab:hover{
+    color:var(--bg);
+    background:linear-gradient(135deg, var(--amber) 0%, var(--amber-2) 100%);
+    border-color:var(--amber); transform:translateY(-2px);
+    box-shadow:0 16px 40px var(--amber-glow), 0 0 0 6px rgba(255,184,0,.10);
+  }
+  .dr-fab:focus-visible{ outline:none; box-shadow:0 0 0 3px var(--bg), 0 0 0 5px var(--amber); }
+  .dr-fab:active{ transform:translateY(0) scale(.98); }
+  .dr-fab .dr-ic{ width:18px; height:18px; flex:0 0 auto; }
+  @media (max-width:600px){
+    .dr-fab{ right:16px; bottom:72px; height:46px; padding:0 15px 0 13px; font-size:12.5px; gap:8px; }
+  }
+  @media (prefers-reduced-motion:reduce){ .dr-fab{ animation:none; opacity:1; transform:none } }
+</style>
+<a class="dr-fab" href="/dept-edit-request" aria-label="학과 정보 수정 신청 페이지로 이동">
+  <svg class="dr-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M12 20h9"/>
+    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+  </svg>
+  <span>학과 정보 수정 신청</span>
+</a>
+
 <!-- ===== 의견·질문 남기기 (베타 피드백) → 구글 폼 연결 =====
      폼 주소가 나오면 아래 스크립트의 FEEDBACK_FORM_URL 한 줄만 교체하세요. -->
 <style>

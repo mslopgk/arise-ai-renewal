@@ -11,11 +11,13 @@ const STATUS = {
 const fmtDate = (s) => { try { return new Date(s).toLocaleString('ko-KR', { dateStyle: 'short', timeStyle: 'short' }); } catch { return s; } };
 
 function targetText(r) {
+  const del = r.action === 'delete';
   if (r.target_level === 'major') {
     const m = r.major_id ? `세부전공 「${r.major_name || `#${r.major_id}`}」` : `신규 세부전공 「${r.major_name || ''}」`;
     const d = r.dept_id ? r.dept_name : `신규 학과 「${r.dept_name || ''}」`;
-    return `${m} · ${d}`;
+    return `${del ? '삭제: ' : ''}${m} · ${d}`;
   }
+  if (del) return `삭제: 학과 「${r.dept_name || `#${r.dept_id}`}」`;
   return r.dept_id ? `학과 「${r.dept_name || `#${r.dept_id}`}」 수정` : `신규 학과 「${r.dept_name || ''}」`;
 }
 
@@ -43,13 +45,19 @@ export default function DeptChangeRequestsAdmin({ onPendingChange }) {
     const r = await api(`/api/admin/dir-change-requests/${id}`);
     if (r.ok) setDetail((await r.json()).request);
   }
-  async function approve(id) {
-    if (!confirm('이 신청을 승인하고 디렉터리에 반영할까요?')) return;
+  async function approve(req) {
+    const isDel = req.action === 'delete';
+    const msg = isDel
+      ? (req.target_level === 'major'
+          ? `세부전공 「${req.major_name}」을(를) 디렉터리에서 삭제합니다. 계속할까요?`
+          : `학과 「${req.dept_name}」과(와) 소속 세부전공 전체를 디렉터리에서 삭제합니다. 되돌릴 수 없습니다. 계속할까요?`)
+      : '이 신청을 승인하고 디렉터리에 반영할까요?';
+    if (!confirm(msg)) return;
     setBusy(true);
     try {
-      const r = await api(`/api/admin/dir-change-requests/${id}/approve`, { method: 'POST' });
+      const r = await api(`/api/admin/dir-change-requests/${req.id}/approve`, { method: 'POST' });
       if (!r.ok) { alert('승인 실패: ' + ((await r.json().catch(() => ({}))).error || r.status)); return; }
-      await load(); await openDetail(id);
+      await load(); await openDetail(req.id);
     } finally { setBusy(false); }
   }
   async function reject(id) {
@@ -84,9 +92,12 @@ export default function DeptChangeRequestsAdmin({ onPendingChange }) {
               style={{ ...S.item, ...(r.id === selId ? S.itemOn : {}) }}>
               <div style={S.itemTop}>
                 <span style={S.itemName}>{r.applicant_name || '(이름 없음)'}</span>
-                <Badge status={r.status} small />
+                <span style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                  {r.action === 'delete' && <span style={S.delTag}>삭제</span>}
+                  <Badge status={r.status} small />
+                </span>
               </div>
-              <div style={S.itemTarget}>{targetText(r)}</div>
+              <div style={{ ...S.itemTarget, ...(r.action === 'delete' ? { color: '#ff9a9d' } : {}) }}>{targetText(r)}</div>
               <div style={S.itemMeta}>{r.affiliation || ''} · {fmtDate(r.created_at)}</div>
             </button>
           ))}
@@ -103,7 +114,10 @@ export default function DeptChangeRequestsAdmin({ onPendingChange }) {
                 <div style={S.detailTitle}>{targetText(detail)}</div>
                 <div style={S.detailSub}>신청 #{detail.id} · {fmtDate(detail.created_at)}</div>
               </div>
-              <Badge status={detail.status} />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end' }}>
+                {detail.action === 'delete' && <span style={S.delTagLg}>삭제 요청</span>}
+                <Badge status={detail.status} />
+              </div>
             </div>
 
             <Group title="신청자">
@@ -121,18 +135,26 @@ export default function DeptChangeRequestsAdmin({ onPendingChange }) {
               )}
             </Group>
 
-            <Group title="디렉터리 내용 (비운 항목은 기존값 유지)">
-              <Row k="소개" v={detail.intro} pre />
-              <Row k="위치" v={detail.location} />
-              <Row k="전화번호" v={detail.phone} />
-              <Row k="홈페이지" v={detail.homepage} link />
-              <Row k="BK21 사업단 홈페이지" v={detail.bk21_url} link />
-            </Group>
-
-            {detail.has_image && (
-              <Group title="첨부 이미지">
-                <img src={`/api/admin/dir-change-requests/${detail.id}/image`} alt="첨부 이미지" style={S.img} />
+            {detail.action === 'delete' ? (
+              <Group title="삭제 사유">
+                <div style={S.delNote}>{detail.note || '(사유 없음)'}</div>
               </Group>
+            ) : (
+              <>
+                <Group title="디렉터리 내용 (비운 항목은 기존값 유지)">
+                  <Row k="소개" v={detail.intro} pre />
+                  <Row k="위치" v={detail.location} />
+                  <Row k="전화번호" v={detail.phone} />
+                  <Row k="홈페이지" v={detail.homepage} link />
+                  <Row k="BK21 사업단 홈페이지" v={detail.bk21_url} link />
+                </Group>
+
+                {detail.has_image && (
+                  <Group title="첨부 이미지">
+                    <img src={`/api/admin/dir-change-requests/${detail.id}/image`} alt="첨부 이미지" style={S.img} />
+                  </Group>
+                )}
+              </>
             )}
 
             {detail.status !== 'pending' && (
@@ -144,7 +166,9 @@ export default function DeptChangeRequestsAdmin({ onPendingChange }) {
 
             {detail.status === 'pending' && (
               <div style={S.btnRow}>
-                <button disabled={busy} onClick={() => approve(detail.id)} style={S.approve}>✓ 승인 · 디렉터리 반영</button>
+                <button disabled={busy} onClick={() => approve(detail)} style={detail.action === 'delete' ? S.approveDel : S.approve}>
+                  {detail.action === 'delete' ? '🗑 승인 · 디렉터리에서 삭제' : '✓ 승인 · 디렉터리 반영'}
+                </button>
                 <button disabled={busy} onClick={() => reject(detail.id)} style={S.reject}>반려</button>
               </div>
             )}
@@ -208,5 +232,9 @@ const S = {
   badgeSm: { fontSize: 10.5, padding: '2px 8px' },
   btnRow: { display: 'flex', gap: 10, marginTop: 22 },
   approve: { background: '#1d7a4d', color: '#fff', border: 'none', padding: '11px 20px', borderRadius: 8, cursor: 'pointer', fontWeight: 700, fontSize: 14 },
+  approveDel: { background: '#a11d1d', color: '#fff', border: 'none', padding: '11px 20px', borderRadius: 8, cursor: 'pointer', fontWeight: 700, fontSize: 14 },
   reject: { background: '#3a1c1c', color: '#ff8a8a', border: '1px solid #5a2a2a', padding: '11px 18px', borderRadius: 8, cursor: 'pointer', fontSize: 14 },
+  delTag: { fontSize: 10, fontWeight: 700, color: '#ff8a8a', background: '#3a1c1c', border: '1px solid #5a2a2a', borderRadius: 4, padding: '1px 5px' },
+  delTagLg: { fontSize: 12, fontWeight: 700, color: '#ff8a8a', background: '#3a1c1c', border: '1px solid #5a2a2a', borderRadius: 999, padding: '4px 11px' },
+  delNote: { whiteSpace: 'pre-wrap', color: '#ffd0d0', background: '#2a1414', border: '1px solid #5a2a2a', borderRadius: 8, padding: '11px 13px', fontSize: 14, lineHeight: 1.6 },
 };
