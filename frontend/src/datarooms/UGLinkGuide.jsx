@@ -244,12 +244,12 @@ export default function UGLinkGuide() {
           </div>
 
           <div className="schol-card">
-            <h4>② BK21 Bridge 장학금 &amp; 연구지원 장려금 (대학원혁신실: 510-7988)</h4>
+            <h4>② BK21 Bridge 장학금 &amp; 연구지원 장려금 (대학원혁신실: 510-7930)</h4>
             <table className="schol-table">
               <tbody>
                 <tr>
                   <td>BK21 Bridge</td>
-                  <td>학사과정 최종학기 재학생 중 BK21 참여 학과 학생 대상 월 70만원 (최대 4개월 지급)</td>
+                  <td>학사과정 최종학기 재학생 중 BK21 참여 학과 학생 대상 월 70만원 (최대 3개월 지급)</td>
                 </tr>
                 <tr>
                   <td>연구지원 장려금</td>

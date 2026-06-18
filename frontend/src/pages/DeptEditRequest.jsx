@@ -210,10 +210,10 @@ export default function DeptEditRequest() {
               <legend><span className="dreq-no">01</span> 신청자</legend>
               <div className="dreq-grid">
                 <Field label="신청자명" required>
-                  <input className="dreq-in" value={applicantName} onChange={(e) => setApplicantName(e.target.value)} placeholder="예: 박선영" />
+                  <input className="dreq-in" value={applicantName} onChange={(e) => setApplicantName(e.target.value)} placeholder="예: 박OO" />
                 </Field>
                 <Field label="소속" required>
-                  <input className="dreq-in" value={affiliation} onChange={(e) => setAffiliation(e.target.value)} placeholder="예: 교육혁신본부 전공디자인팀" />
+                  <input className="dreq-in" value={affiliation} onChange={(e) => setAffiliation(e.target.value)} placeholder="예: 인문대학 국어국문학과" />
                 </Field>
                 <Field label="내선전화번호">
                   <input className="dreq-in" value={extPhone} onChange={(e) => setExtPhone(e.target.value)} placeholder="예: 7256" />
