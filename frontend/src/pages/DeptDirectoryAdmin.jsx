@@ -39,6 +39,8 @@ export default function DeptDirectoryAdmin() {
   const [q, setQ] = useState('');
   const [selId, setSelId] = useState(null);
   const [loading, setLoading] = useState(true);
+  const fileRef = useRef(null);
+  const [preview, setPreview] = useState(null); // { encoding, garbled, summary, rows, csvBase64, busy }
 
   async function load() {
     const r = await api('/api/departments');
@@ -81,8 +83,39 @@ export default function DeptDirectoryAdmin() {
     await load();
   }
 
+  // === CSV 일괄 가져오기 ===
+  async function onPickFile(e) {
+    const file = e.target.files?.[0]; if (!file) return;
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    let bin = ''; for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    const csvBase64 = btoa(bin);
+    e.target.value = '';
+    const r = await api('/api/admin/directory/import/preview', { method: 'POST', body: JSON.stringify({ csvBase64 }) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { alert('미리보기 실패: ' + (j.error || '')); return; }
+    setPreview({ ...j, csvBase64 });
+  }
+  async function commitImport() {
+    setPreview((p) => ({ ...p, busy: true }));
+    const r = await api('/api/admin/directory/import/commit', { method: 'POST', body: JSON.stringify({ csvBase64: preview.csvBase64, confirm: true }) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { alert('적용 실패: ' + (j.error || '')); setPreview((p) => ({ ...p, busy: false })); return; }
+    alert(`반영 완료 — 추가 ${j.added} · 수정 ${j.updated} · 스킵 ${j.skipped}`);
+    setPreview(null);
+    await load();
+  }
+
   return (
-    <div style={S.wrap}>
+    <div>
+      <div style={S.bulkBar}>
+        <span style={S.bulkTitle}>대량 관리</span>
+        <a href="/api/admin/directory/export" style={S.bulkBtn}>현재 디렉터리 내보내기 (CSV)</a>
+        <button type="button" onClick={() => fileRef.current?.click()} style={S.bulkBtnPrimary}>CSV 가져오기</button>
+        <input ref={fileRef} type="file" accept=".csv,text/csv" hidden onChange={onPickFile} />
+        <span style={S.bulkHint}>학과·세부전공 텍스트 일괄 추가·수정 (이미지·삭제 제외)</span>
+      </div>
+
+      <div style={S.wrap}>
       {/* 목록 */}
       <div style={S.listPane}>
         <div style={S.listHead}>
@@ -117,6 +150,58 @@ export default function DeptDirectoryAdmin() {
         ) : (
           <div style={S.placeholder}>← 학과를 선택하거나 추가하세요.</div>
         )}
+        </div>
+      </div>
+
+      {preview && (
+        <ImportPreviewModal preview={preview} onClose={() => setPreview(null)} onCommit={commitImport} />
+      )}
+    </div>
+  );
+}
+
+function ImportPreviewModal({ preview, onClose, onCommit }) {
+  const { summary, rows, encoding, garbled } = preview;
+  const nothing = summary.added + summary.updated === 0;
+  const actionKo = (a) => (a === 'add' ? '추가' : a === 'update' ? '수정' : '오류');
+  const kindKo = (k) => (k === 'dept' ? '학과' : k === 'major' ? '세부전공' : '-');
+  return (
+    <div style={S.modalOverlay} onClick={onClose}>
+      <div style={S.modal} onClick={(e) => e.stopPropagation()}>
+        <div style={S.cardTitle}>CSV 가져오기 미리보기</div>
+        {garbled && (
+          <div style={S.warn}>⚠ 한글이 깨져 보입니다. 적용하지 말고 엑셀에서 "CSV UTF-8"로 다시 저장해 올려주세요. (감지 인코딩: {encoding})</div>
+        )}
+        <div style={S.summaryRow}>
+          <span style={S.badgeAdd}>추가 {summary.added}</span>
+          <span style={S.badgeUpd}>수정 {summary.updated}</span>
+          <span style={S.badgeErr}>오류/스킵 {summary.skipped}</span>
+          <span style={S.bulkHint}>인코딩 {encoding}</span>
+        </div>
+        <div style={S.modalTableWrap}>
+          <table style={S.modalTable}>
+            <thead>
+              <tr>
+                <th style={S.th}>행</th><th style={S.th}>동작</th><th style={S.th}>구분</th><th style={S.th}>이름</th><th style={S.th}>오류</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr key={r.lineNo} style={r.action === 'error' ? S.trErr : null}>
+                  <td style={S.td}>{r.lineNo}</td>
+                  <td style={S.td}>{actionKo(r.action)}</td>
+                  <td style={S.td}>{kindKo(r.kind)}</td>
+                  <td style={S.td}>{r.name}</td>
+                  <td style={S.td}>{(r.errors || []).join('; ')}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div style={S.btnRow}>
+          <button onClick={onCommit} disabled={nothing || preview.busy} style={{ ...S.primary, ...(nothing ? S.inputDisabled : {}) }}>{preview.busy ? '적용 중…' : '적용'}</button>
+          <button onClick={onClose} style={S.ghost}>취소</button>
+        </div>
       </div>
     </div>
   );
@@ -288,4 +373,23 @@ const S = {
   addBtn: { background: '#1f2230', color: '#e8e8ea', border: '1px solid #3a3d48', padding: '8px 12px', borderRadius: 6, cursor: 'pointer', fontSize: 13 },
   majRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 10px', borderBottom: '1px solid #20232c', fontSize: 14, color: '#ddd' },
   majCard: { background: '#0e0f13', border: '1px solid #2a2d38', borderRadius: 8, padding: 14, marginBottom: 10 },
+  // 대량 관리 툴바
+  bulkBar: { display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', background: '#16181f', border: '1px solid #2a2d38', borderRadius: 10, padding: '12px 14px', marginBottom: 16 },
+  bulkTitle: { fontSize: 13, fontWeight: 600, color: '#ddd', marginRight: 4 },
+  bulkBtn: { background: '#1f2230', color: '#e8e8ea', border: '1px solid #3a3d48', padding: '8px 14px', borderRadius: 6, cursor: 'pointer', fontSize: 13, textDecoration: 'none' },
+  bulkBtnPrimary: { background: '#3672b8', color: '#fff', border: 'none', padding: '8px 14px', borderRadius: 6, cursor: 'pointer', fontSize: 13, fontWeight: 600 },
+  bulkHint: { fontSize: 11, color: '#7a7a82' },
+  // 미리보기 모달
+  modalOverlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 },
+  modal: { background: '#16181f', border: '1px solid #2a2d38', borderRadius: 12, padding: 20, width: 'min(760px, 94vw)', maxHeight: '88vh', display: 'flex', flexDirection: 'column' },
+  warn: { background: '#3a1c1c', color: '#ff8a8a', border: '1px solid #5a2a2a', borderRadius: 8, padding: '10px 12px', fontSize: 13, marginBottom: 12 },
+  summaryRow: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, flexWrap: 'wrap' },
+  badgeAdd: { background: '#16301e', color: '#7fe0a3', border: '1px solid #265a38', borderRadius: 6, padding: '3px 10px', fontSize: 13 },
+  badgeUpd: { background: '#1a2740', color: '#86b6f0', border: '1px solid #2a4a78', borderRadius: 6, padding: '3px 10px', fontSize: 13 },
+  badgeErr: { background: '#3a1c1c', color: '#ff8a8a', border: '1px solid #5a2a2a', borderRadius: 6, padding: '3px 10px', fontSize: 13 },
+  modalTableWrap: { overflow: 'auto', border: '1px solid #2a2d38', borderRadius: 8, flex: '1 1 auto' },
+  modalTable: { width: '100%', borderCollapse: 'collapse', fontSize: 13 },
+  th: { position: 'sticky', top: 0, background: '#0e0f13', color: '#9a9aa2', textAlign: 'left', padding: '8px 10px', borderBottom: '1px solid #2a2d38', fontWeight: 600, whiteSpace: 'nowrap' },
+  td: { padding: '7px 10px', borderBottom: '1px solid #20232c', color: '#ddd', verticalAlign: 'top' },
+  trErr: { background: '#241416', color: '#ff8a8a' },
 };
