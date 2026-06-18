@@ -37,12 +37,12 @@
 
 ### 3-1. PostgreSQL DB / 계정 생성
 
-기본값으로 `user=pnug / password=pnug / db=pnug` 를 기대함. (4-1의 `.env`에서 바꿀 수 있음)
+기본값으로 `user=arise / password=arise / db=arise` 를 기대함. (4-1의 `.env`에서 바꿀 수 있음)
 
 ```sql
 -- psql 관리자(postgres)로 접속해서 실행
-CREATE USER pnug WITH PASSWORD 'pnug';
-CREATE DATABASE pnug OWNER pnug;
+CREATE USER arise WITH PASSWORD 'arise';
+CREATE DATABASE arise OWNER arise;
 ```
 
 ### 3-2. 백엔드 환경설정 파일 작성
@@ -58,10 +58,10 @@ FRONTEND_URL=https://arise-ai.pusan.ac.kr
 # DB (위 3-1 기본값과 일치해야 함). 다른 DB면 DATABASE_URL 한 줄로 대체 가능.
 PGHOST=localhost
 PGPORT=5432
-PGUSER=pnug
-PGPASSWORD=pnug
-PGDATABASE=pnug
-# DATABASE_URL=postgres://pnug:pnug@localhost:5432/pnug
+PGUSER=arise
+PGPASSWORD=arise
+PGDATABASE=arise
+# DATABASE_URL=postgres://arise:arise@localhost:5432/arise
 
 # 관리자/인증 토큰 서명키 (반드시 임의의 긴 문자열로 교체)
 JWT_SECRET=<48바이트 정도의 임의 문자열로 교체>

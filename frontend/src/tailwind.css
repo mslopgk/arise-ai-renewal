@@ -3,17 +3,17 @@
    원본 arise_pnu_redesign_claude/src/app/globals.css 를 "그대로" 포팅한다.
    변형 페이지는 원본과 동일하게 풀 Tailwind(preflight 포함)로 렌더된다.
 
-   기존 pnug(신청/관리자/데이터룸) 페이지 보호 = cascade layer 순서로만 처리:
-     theme, base, [pnug], components, utilities
-   - 'pnug' 가 base(preflight)보다 위 → styles.css 가 preflight 를 이겨 pnug 외관 유지.
-   - 'utilities' 가 pnug 보다 위 → 변형 페이지에서 Tailwind 유틸리티가 styles.css
+   기존 arise(신청/관리자/데이터룸) 페이지 보호 = cascade layer 순서로만 처리:
+     theme, base, [arise], components, utilities
+   - 'arise' 가 base(preflight)보다 위 → styles.css 가 preflight 를 이겨 arise 외관 유지.
+   - 'utilities' 가 arise 보다 위 → 변형 페이지에서 Tailwind 유틸리티가 styles.css
      element 규칙(h1/h2)을 이긴다(원본과 동일한 결과).
-   - 각 pnug 페이지의 개별 CSS(gateway.css/admission.css/...)는 unlayered 라
+   - 각 arise 페이지의 개별 CSS(gateway.css/admission.css/...)는 unlayered 라
      모든 레이어를 이겨 그대로 유지된다.
    ============================================================================= */
 
-/* 레이어 순서 고정 — Tailwind import 보다 먼저 선언해야 pnug 위치가 박힌다. */
-@layer theme, base, pnug, components, utilities;
+/* 레이어 순서 고정 — Tailwind import 보다 먼저 선언해야 arise 위치가 박힌다. */
+@layer theme, base, arise, components, utilities;
 
 /* 폰트는 폐쇄망(air-gapped) 대응으로 src/fonts.js 에서 로컬 번들 import 한다.
    (원본의 CDN @import url(...) 은 폐쇄망에서 로드 실패 → 글자체가 폴백으로 바뀜) */
@@ -45,7 +45,7 @@
   --color-g-green: #34A853;
 }
 
-/* --- 원본 globals.css 의 baseline. @layer base 에 둬서 pnug(위)·변형 루트
+/* --- 원본 globals.css 의 baseline. @layer base 에 둬서 arise(위)·변형 루트
        (.mono-root, unlayered)가 각 페이지에서 덮어쓸 수 있게 한다. --- */
 @layer base {
   :root {

@@ -15,9 +15,9 @@ export const pool = new Pool(
     : {
         host: process.env.PGHOST || 'localhost',
         port: process.env.PGPORT ? Number(process.env.PGPORT) : 5432,
-        user: process.env.PGUSER || 'pnug',
-        password: process.env.PGPASSWORD || 'pnug',
-        database: process.env.PGDATABASE || 'pnug',
+        user: process.env.PGUSER || 'arise',
+        password: process.env.PGPASSWORD || 'arise',
+        database: process.env.PGDATABASE || 'arise',
         max: 10,
       }
 );

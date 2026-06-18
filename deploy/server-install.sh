@@ -4,8 +4,8 @@
 set -euo pipefail
 SUDOPW="${SUDOPW:-ubuntu}"
 S(){ echo "$SUDOPW" | sudo -S -p '' "$@"; }
-BUNDLE="${BUNDLE:-$HOME/pnug-deploy}"
-STACK="$HOME/pnug-stack"
+BUNDLE="${BUNDLE:-$HOME/arise-deploy}"
+STACK="$HOME/arise-stack"
 
 cd "$BUNDLE"
 echo "=== [1/5] Docker 엔진 설치 (static binaries) ==="
@@ -59,7 +59,7 @@ cd "$STACK"
 S docker compose up -d
 echo "postgres 헬스 대기..."
 for i in $(seq 1 40); do
-  st=$(S docker inspect -f '{{.State.Health.Status}}' pnug-postgres-1 2>/dev/null || echo none)
+  st=$(S docker inspect -f '{{.State.Health.Status}}' arise-postgres-1 2>/dev/null || echo none)
   if [ "$st" = healthy ]; then echo "postgres healthy (~$((i*2))s)"; break; fi
   sleep 2
 done

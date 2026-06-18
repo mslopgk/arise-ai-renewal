@@ -45,7 +45,7 @@
 
 ```bash
 # 1) DB (최초 1회) — psql 관리자로
-#    CREATE USER pnug WITH PASSWORD 'pnug';  CREATE DATABASE pnug OWNER pnug;
+#    CREATE USER arise WITH PASSWORD 'arise';  CREATE DATABASE arise OWNER arise;
 
 # 2) 의존성
 cd backend  && npm install
@@ -85,13 +85,13 @@ cd frontend && npm run dev    # Vite     http://localhost:5173
 
 ## 프로덕션 — arise-ai.pusan.ac.kr
 
-부산대 내부 서버(Ubuntu, 폐쇄망)에서 **Docker compose**로 운영: `nginx`(80→443 강제, 부산대 와일드카드 TLS) + `was`(Express, self-contained 이미지에 `frontend/dist` 내장) + `postgres:16`(`pnug_pgdata` 볼륨).
+부산대 내부 서버(Ubuntu, 폐쇄망)에서 **Docker compose**로 운영: `nginx`(80→443 강제, 부산대 와일드카드 TLS) + `was`(Express, self-contained 이미지에 `frontend/dist` 내장) + `postgres:16`(`arise_pgdata` 볼륨).
 
 **재배포 요약** (무중단 — `was`만 재생성, DB·nginx 보존):
 ```bash
-docker build --provenance=false -t pnug-was:latest .
-docker save pnug-was:latest | gzip > images.tar.gz
-# → 서버 ~/pnug-deploy 로 scp → docker load → (cd ~/pnug-stack && docker compose up -d)
+docker build --provenance=false -t arise-was:latest .
+docker save arise-was:latest | gzip > images.tar.gz
+# → 서버 ~/arise-deploy 로 scp → docker load → (cd ~/arise-stack && docker compose up -d)
 ```
 새 컬럼/테이블은 부팅 시 `initSchema()`가 자동 반영(별도 마이그레이션 불필요).
 
@@ -104,7 +104,7 @@ docker save pnug-was:latest | gzip > images.tar.gz
 - [ ] `ADMIN_BOOTSTRAP_PASSWORD` 강한 PW로 시드 후 `.env`에서 제거
 - [ ] `NODE_ENV=production` (secure 쿠키)
 - [ ] OAuth redirect URI / consent에 prod 도메인 등록
-- [ ] DB 볼륨 백업(`pnug_pgdata`)
+- [ ] DB 볼륨 백업(`arise_pgdata`)
 - [ ] (검토) 공개 제출 엔드포인트 rate-limit — `/dept-edit-request`는 로그인 없이 제출 가능하므로 스팸 유입 시 관리자 검토 큐에서 정리
 
 ---

@@ -8,11 +8,11 @@ echo "=== docker group effective in this session? ==="
 id -nG | tr ' ' '\n' | grep -qx docker && echo "yes (sudo 불필요)" || echo "no (현재 세션은 sudo 경유; 재로그인 시 해제)"
 
 echo "=== compose ps ==="
-cd ~/pnug-stack && DK compose ps
+cd ~/arise-stack && DK compose ps
 
 echo "=== was 헬스 대기 ==="
 for i in $(seq 1 20); do
-  st=$(DK inspect -f '{{.State.Health.Status}}' pnug-was-1 2>/dev/null || echo none)
+  st=$(DK inspect -f '{{.State.Health.Status}}' arise-was-1 2>/dev/null || echo none)
   if [ "$st" = healthy ]; then echo "was healthy"; break; fi
   sleep 2
 done
@@ -30,7 +30,7 @@ for p in /health /api/departments / /admission-v3-dark.html /login; do
 done
 
 echo "=== E2E (읽기전용, 실 JWT_SECRET) ==="
-DK cp ~/pnug-deploy/server-verify.mjs pnug-was-1:/app/backend/server-verify.mjs
+DK cp ~/arise-deploy/server-verify.mjs arise-was-1:/app/backend/server-verify.mjs
 DK compose exec -T was node server-verify.mjs || true
 
 echo "=== ufw status ==="

@@ -9,17 +9,17 @@
 
 ## 현재 상태 (LIVE, 2026-06-12 확인)
 - **Docker 29.5.3** 오프라인 설치(static binaries + systemd, 부팅 자동시작)
-- **스택**: 서버 `~/pnug-stack/docker-compose.yml`이 원본 (레포의 docker-compose.https.yml은 8491bc3에서 삭제됨)
-  = `nginx`(80/443 TLS 종단) + `was`(Express) + `postgres:16`. 컨테이너명 `pnug-{nginx,was,postgres}-1`.
+- **스택**: 서버 `~/arise-stack/docker-compose.yml`이 원본 (레포의 docker-compose.https.yml은 8491bc3에서 삭제됨)
+  = `nginx`(80/443 TLS 종단) + `was`(Express) + `postgres:16`. 컨테이너명 `arise-{nginx,was,postgres}-1`.
 - **was 이미지는 self-contained** (frontend dist 내장, bind-mount 없음; `sheets-sa.json`만 마운트) — 2026-06-08 전환.
 - **인증서: 부산대 공식 와일드카드** `*.pusan.ac.kr` (GlobalSign RSA OV, SAN: `*.pusan.ac.kr`/`*.pnu.edu`/`pusan.ac.kr`), **만료 2027-01-02**.
-  - 위치: `~/pnug-stack/certs/{fullchain.pem, privkey.pem}` (nginx 컨테이너에 `/etc/nginx/certs`로 마운트)
-  - **갱신**: 전산팀에서 새 와일드카드 수령 → 위 두 파일 교체 → `docker exec pnug-nginx-1 nginx -s reload`
+  - 위치: `~/arise-stack/certs/{fullchain.pem, privkey.pem}` (nginx 컨테이너에 `/etc/nginx/certs`로 마운트)
+  - **갱신**: 전산팀에서 새 와일드카드 수령 → 위 두 파일 교체 → `docker exec arise-nginx-1 nginx -s reload`
   - ~~Let's Encrypt + acme.sh (HTTP-01 stateless)~~ → **폐기됨** (2026-06-08 와일드카드로 교체. acme 스크립트·:80 챌린지 location 불필요)
   - 참고: `pusan.ac.kr`은 브라우저 **HSTS preload** 도메인 — 도메인 접속은 항상 HTTPS로 강제되며, 유효 인증서가 필수(만료 시 우회 불가 전면 차단).
 - **Google OAuth: 설정 완료** — `/auth/google`이 Google로 302 (2026-06-12 확인). redirect URI `https://arise-ai.pusan.ac.kr/auth/google/callback`.
 - **HTTP(80) → HTTPS 301 강제 적용됨** (2026-06-12, 검증 완료: http→301 / https→200).
-- DB: PostgreSQL 마이그레이션·시드 완료. 볼륨 `pnug_pgdata`.
+- DB: PostgreSQL 마이그레이션·시드 완료. 볼륨 `arise_pgdata`.
 
 ## 해결된 문제: 내부망 관리자 로그인 무한 루프 (2026-06-12 분석·적용 완료)
 - **증상**: 부산대 내부망에서 관리자 로그인 → 다시 로그인창 무한 반복. 외부망에선 정상.
@@ -32,30 +32,30 @@
 - **운영 안내**: 내부 사용자는 도메인(`https://arise-ai.pusan.ac.kr`)으로 접속할 것. IP 접속은 인증서 경고(우회 가능).
   ※ 향후 유사 작업 시 사전 확인: 교내에서 443이 닿는지 — 안 닿는 상태로 80을 막으면 내부 전체 불통이 됨.
 
-## 자격증명 (서버 ~/pnug-stack/.env)
+## 자격증명 (서버 ~/arise-stack/.env)
 - admin 계정: `admin` / `SiBwlZc81BAV0TtB` (시드값 — 2026-06-12 유지 결정)
-- PostgreSQL: `pnug` / `6k4P06iXKBHQwlarsoyWBJPA` (DB `pnug`)
+- PostgreSQL: `arise` / `6k4P06iXKBHQwlarsoyWBJPA` (DB `arise`)
 - SSH: `ubuntu` 계정, 키 인증(2026-06-08 등록) 또는 비밀번호 — sudo 비번 동일. JWT_SECRET 등은 `.env` 참조. **이 파일은 git 커밋 금지.**
 
 ## 운영 명령 (서버에서; 권한 오류 시 sudo)
 ```bash
-cd ~/pnug-stack
+cd ~/arise-stack
 docker compose ps                 # 상태
 docker compose logs -f was        # 앱 로그
 docker compose restart was        # 앱 재시작
-docker exec pnug-nginx-1 nginx -t           # nginx 설정 문법 검증
-docker exec pnug-nginx-1 nginx -s reload    # nginx 무중단 재적용 (설정/인증서 교체 후)
-docker compose down               # 중지 (DB 볼륨 pnug_pgdata 보존)
+docker exec arise-nginx-1 nginx -t           # nginx 설정 문법 검증
+docker exec arise-nginx-1 nginx -s reload    # nginx 무중단 재적용 (설정/인증서 교체 후)
+docker compose down               # 중지 (DB 볼륨 arise_pgdata 보존)
 docker compose up -d              # 기동
 docker compose exec -T was node src/init-db.js   # 재시드(주의: 기존 응답 삭제)
 ```
-DB 접속: `docker compose exec postgres psql -U pnug -d pnug`
+DB 접속: `docker compose exec postgres psql -U arise -d arise`
 
 ## 재배포
 ### 코드(이미지) 재배포 — 빌드는 인터넷 되는 PC/WSL, 반입은 화이트리스트 PC에서
-1. `docker build --provenance=false -t pnug-was:latest .`
-2. `docker save pnug-was:latest | gzip > images.tar.gz`
-3. scp(포트 11097)로 서버 `~/pnug-deploy/` 반입 → `docker load -i images.tar.gz` → `cd ~/pnug-stack && docker compose up -d`
+1. `docker build --provenance=false -t arise-was:latest .`
+2. `docker save arise-was:latest | gzip > images.tar.gz`
+3. scp(포트 11097)로 서버 `~/arise-deploy/` 반입 → `docker load -i images.tar.gz` → `cd ~/arise-stack && docker compose up -d`
    - was 컨테이너만 recreate되는 무중단 배포(2026-06-08 검증). `down` 불필요. DB·nginx 보존.
    - 화이트리스트 PC용 원클릭 패턴: `deploy/rollout-2026-06-12/apply.bat` 참고 (이미지를 폴더에 두면 자동 감지·적재)
 ### nginx 설정만 변경
@@ -63,7 +63,7 @@ DB 접속: `docker compose exec postgres psql -U pnug -d pnug`
 - 레포 canonical(`deploy/nginx/conf.d/arise-ai.conf`)과 서버 적용본을 항상 동기화할 것.
 
 ## 파일 위치
-- 서버: 스택 `~/pnug-stack/` (compose·`.env`·`certs/`·nginx conf.d·`backups/`) · 반입물 `~/pnug-deploy/` · 소스 `~/pnu-grad/`
+- 서버: 스택 `~/arise-stack/` (compose·`.env`·`certs/`·nginx conf.d·`backups/`) · 반입물 `~/arise-deploy/` · 소스 `~/pnu-grad/`
 - 레포: `deploy/` — compose 참고본·nginx conf(canonical)·검증 스크립트(`server-verify.sh`, `validate-stack.sh`, `smoke.mjs`)·self-signed placeholder 인증서(`certs/`, 로컬 검증용)
 
 ## 변경 이력

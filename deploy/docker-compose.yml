@@ -1,7 +1,7 @@
 # pnu-grad 풀스택 (arise-ai.pusan.ac.kr) — 도면 v1.2 기반
 # 네트워크 3분할로 격리: edge(공개), data(DB/캐시 비공개), monitoring.
 # 자원제한은 ceiling(상한). 16core/23GB 노드에서 여유 충분.
-name: pnug
+name: arise
 
 services:
   # ---------- 리버스 프록시 (TLS 종단 + 서브도메인 라우팅) ----------
@@ -26,7 +26,7 @@ services:
     build:
       context: ..
       dockerfile: Dockerfile
-    image: pnug-was:latest
+    image: arise-was:latest
     restart: unless-stopped
     env_file: .env
     expose:
