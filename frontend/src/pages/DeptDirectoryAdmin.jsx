@@ -40,7 +40,12 @@ export default function DeptDirectoryAdmin() {
   const [selId, setSelId] = useState(null);
   const [loading, setLoading] = useState(true);
   const fileRef = useRef(null);
-  const [preview, setPreview] = useState(null); // { encoding, garbled, summary, rows, csvBase64, busy }
+  const [preview, setPreview] = useState(null); // { encoding, garbled, summary, rows, csvBase64, phase, errorMsg }
+  const [snapshot, setSnapshot] = useState({ exists: false });
+  async function refreshSnapshot() {
+    const r = await api('/api/admin/directory/snapshot');
+    if (r.ok) setSnapshot(await r.json());
+  }
 
   async function load() {
     const r = await api('/api/departments');
@@ -48,7 +53,7 @@ export default function DeptDirectoryAdmin() {
     setDepts(Array.isArray(data) ? data : []);
     setLoading(false);
   }
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); refreshSnapshot(); }, []);
 
   const filtered = depts
     .filter(d => (!gyeFilter || d.gyeyeol === gyeFilter) &&
@@ -96,12 +101,29 @@ export default function DeptDirectoryAdmin() {
     setPreview({ ...j, csvBase64 });
   }
   async function commitImport() {
-    setPreview((p) => ({ ...p, busy: true }));
-    const r = await api('/api/admin/directory/import/commit', { method: 'POST', body: JSON.stringify({ csvBase64: preview.csvBase64, confirm: true }) });
-    const j = await r.json().catch(() => ({}));
-    if (!r.ok) { alert('적용 실패: ' + (j.error || '')); setPreview((p) => ({ ...p, busy: false })); return; }
-    alert(`반영 완료 — 추가 ${j.added} · 수정 ${j.updated} · 스킵 ${j.skipped}`);
+    setPreview((p) => ({ ...p, phase: 'applying', errorMsg: '' }));
+    let r, j;
+    try {
+      r = await api('/api/admin/directory/import/commit', { method: 'POST', body: JSON.stringify({ csvBase64: preview.csvBase64, confirm: true }) });
+      j = await r.json().catch(() => ({}));
+    } catch (e) {
+      setPreview((p) => ({ ...p, phase: 'error', errorMsg: '네트워크 오류: ' + e.message })); return;
+    }
+    if (!r.ok) {
+      setPreview((p) => ({ ...p, phase: 'error', errorMsg: j.message || j.error || ('알 수 없는 오류 (HTTP ' + r.status + ')') })); return;
+    }
     setPreview(null);
+    await refreshSnapshot();
+    await load();
+    alert(`반영 완료 — 추가 ${j.added} · 수정 ${j.updated} · 스킵 ${j.skipped}`);
+  }
+  async function undoImport() {
+    if (!confirm('마지막 가져오기를 되돌립니다.\n⚠ 이 가져오기 이후의 디렉터리 변경도 함께 되돌아갑니다. 계속할까요?')) return;
+    const r = await api('/api/admin/directory/import/undo', { method: 'POST' });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { alert('되돌리기 실패: ' + (j.message || j.error || '')); return; }
+    alert(`되돌리기 완료 — 학과 ${j.depts} · 세부전공 ${j.majors} 복원`);
+    await refreshSnapshot();
     await load();
   }
 
@@ -112,6 +134,9 @@ export default function DeptDirectoryAdmin() {
         <a href="/api/admin/directory/export" style={S.bulkBtn}>현재 디렉터리 내보내기 (CSV)</a>
         <button type="button" onClick={() => fileRef.current?.click()} style={S.bulkBtnPrimary}>CSV 가져오기</button>
         <input ref={fileRef} type="file" accept=".csv,text/csv" hidden onChange={onPickFile} />
+        {snapshot.exists && (
+          <button type="button" onClick={undoImport} style={S.bulkBtnUndo} title={snapshot.summary || ''}>↺ 마지막 가져오기 되돌리기</button>
+        )}
         <span style={S.bulkHint}>학과·세부전공 텍스트 일괄 추가·수정 (이미지·삭제 제외)</span>
       </div>
 
@@ -161,12 +186,14 @@ export default function DeptDirectoryAdmin() {
 }
 
 function ImportPreviewModal({ preview, onClose, onCommit }) {
-  const { summary, rows, encoding, garbled } = preview;
+  const { summary, rows, encoding, garbled, phase, errorMsg } = preview;
+  const applying = phase === 'applying';
   const nothing = summary.added + summary.updated === 0;
   const actionKo = (a) => (a === 'add' ? '추가' : a === 'update' ? '수정' : '오류');
   const kindKo = (k) => (k === 'dept' ? '학과' : k === 'major' ? '세부전공' : '-');
   return (
-    <div style={S.modalOverlay} onClick={onClose}>
+    <div style={S.modalOverlay} onClick={applying ? undefined : onClose}>
+      <style>{`@keyframes dda-spin{to{transform:rotate(360deg)}}`}</style>
       <div style={S.modal} onClick={(e) => e.stopPropagation()}>
         <div style={S.cardTitle}>CSV 가져오기 미리보기</div>
         {garbled && (
@@ -198,9 +225,18 @@ function ImportPreviewModal({ preview, onClose, onCommit }) {
             </tbody>
           </table>
         </div>
+        {phase === 'error' && (
+          <div style={S.warn}>적용 실패 — {errorMsg}</div>
+        )}
         <div style={S.btnRow}>
-          <button onClick={onCommit} disabled={nothing || preview.busy} style={{ ...S.primary, ...(nothing ? S.inputDisabled : {}) }}>{preview.busy ? '적용 중…' : '적용'}</button>
-          <button onClick={onClose} style={S.ghost}>취소</button>
+          {applying ? (
+            <span style={S.applying}><span style={S.spinner} /> 적용 중입니다…</span>
+          ) : (
+            <>
+              <button onClick={onCommit} disabled={nothing} style={{ ...S.primary, ...(nothing ? S.inputDisabled : {}) }}>{phase === 'error' ? '다시 시도' : '적용'}</button>
+              <button onClick={onClose} style={S.ghost}>취소</button>
+            </>
+          )}
         </div>
       </div>
     </div>
@@ -392,4 +428,7 @@ const S = {
   th: { position: 'sticky', top: 0, background: '#0e0f13', color: '#9a9aa2', textAlign: 'left', padding: '8px 10px', borderBottom: '1px solid #2a2d38', fontWeight: 600, whiteSpace: 'nowrap' },
   td: { padding: '7px 10px', borderBottom: '1px solid #20232c', color: '#ddd', verticalAlign: 'top' },
   trErr: { background: '#241416', color: '#ff8a8a' },
+  bulkBtnUndo: { background: '#3a2c12', color: '#f0c070', border: '1px solid #6a4f20', padding: '8px 14px', borderRadius: 6, cursor: 'pointer', fontSize: 13 },
+  applying: { display: 'inline-flex', alignItems: 'center', gap: 8, color: '#ccc', fontSize: 14 },
+  spinner: { width: 16, height: 16, border: '2px solid #3a3d48', borderTopColor: '#3672b8', borderRadius: '50%', display: 'inline-block', animation: 'dda-spin .7s linear infinite' },
 };
