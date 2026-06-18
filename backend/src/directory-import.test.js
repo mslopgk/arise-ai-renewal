@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   GYE, HEADERS, parseCsv, serializeCsv, decodeUpload, treeToRows,
   parseYesNo, parseHashtags, headerIndex, rowToRecord, buildPlan, applyPlan,
+  snapshotDirectory, restoreLatestSnapshot,
 } from './directory-import.js';
 
 // --- 상수 ---
@@ -180,4 +181,36 @@ test('applyPlan: 부분 UPDATE는 제공 컬럼만 SET', async () => {
   assert.match(upd.sql, /SET recruit=\?/);
   assert.doesNotMatch(upd.sql, /name=/);
   assert.deepEqual(upd.p, [0, 34]);
+});
+
+// --- snapshot / restore (fake exec) ---
+function fakeExec2() {
+  const calls = []; let seq = 10;
+  return {
+    calls,
+    get: async (sql, ...p) => {
+      calls.push({ sql, p });
+      if (/INSERT INTO dir_snapshots/.test(sql)) return { id: ++seq };
+      if (/ORDER BY id DESC/.test(sql)) return null; // 스냅샷 없음 시나리오
+      return { c: 0 };
+    },
+    run: async (sql, ...p) => { calls.push({ sql, p }); },
+  };
+}
+
+test('snapshotDirectory: 최근1건 유지 + 백업 복사 순서', async () => {
+  const ex = fakeExec2();
+  const sid = await snapshotDirectory(ex, '백업요약');
+  assert.equal(sid, 11);
+  const sqls = ex.calls.map((c) => c.sql);
+  assert.match(sqls[0], /^DELETE FROM dir_snapshots/);
+  assert.match(sqls[1], /INSERT INTO dir_snapshots .* RETURNING id/);
+  assert.ok(sqls.some((s) => /INSERT INTO dir_dept_backup .* SELECT/.test(s)));
+  assert.ok(sqls.some((s) => /INSERT INTO dir_major_backup .* SELECT/.test(s)));
+});
+
+test('restoreLatestSnapshot: 스냅샷 없으면 ok:false', async () => {
+  const ex = fakeExec2();
+  const r = await restoreLatestSnapshot(ex);
+  assert.deepEqual(r, { ok: false, error: 'no_snapshot' });
 });

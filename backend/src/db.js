@@ -181,6 +181,25 @@ export async function initSchema() {
     );
     CREATE INDEX IF NOT EXISTS idx_dir_maj_dept ON dir_majors(dept_id);
 
+    -- === CSV 가져오기 되돌리기용 스냅샷 (최근 1건) ===
+    CREATE TABLE IF NOT EXISTS dir_snapshots (
+      id SERIAL PRIMARY KEY,
+      created_at timestamptz DEFAULT now(),
+      summary TEXT
+    );
+    CREATE TABLE IF NOT EXISTS dir_dept_backup (
+      snapshot_id INTEGER NOT NULL REFERENCES dir_snapshots(id) ON DELETE CASCADE,
+      id INTEGER, gyeyeol TEXT, name TEXT, recruit INTEGER, homepage TEXT, hashtags jsonb,
+      location TEXT, phone TEXT, bk21 INTEGER, bk21_name TEXT, bk21_url TEXT, intro TEXT,
+      ord INTEGER, image_mime TEXT, image_data bytea, created_at timestamptz
+    );
+    CREATE TABLE IF NOT EXISTS dir_major_backup (
+      snapshot_id INTEGER NOT NULL REFERENCES dir_snapshots(id) ON DELETE CASCADE,
+      id INTEGER, dept_id INTEGER, name TEXT, recruit INTEGER, homepage TEXT, hashtags jsonb,
+      location TEXT, phone TEXT, bk21 INTEGER, bk21_name TEXT, bk21_url TEXT, intro TEXT,
+      ord INTEGER, image_mime TEXT, image_data bytea
+    );
+
     -- === 학과 정보 수정 신청 (학과 관계자 제출 → 관리자 검토 큐 → 승인 시 디렉터리 반영) ===
     CREATE TABLE IF NOT EXISTS dir_change_requests (
       id SERIAL PRIMARY KEY,

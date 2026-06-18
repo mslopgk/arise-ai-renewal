@@ -6,6 +6,7 @@ import { mirrorResponseToSheet, getSheetStatus } from './sheets.js';
 import {
   treeToRows, serializeCsv, decodeUpload, parseCsv,
   headerIndex, rowToRecord, buildPlan, applyPlan,
+  snapshotDirectory, restoreLatestSnapshot,
 } from './directory-import.js';
 
 const router = express.Router();
@@ -322,9 +323,34 @@ router.post('/directory/import/commit', requireAdmin, async (req, res) => {
     if (!req.body || req.body.confirm !== true) return res.status(400).json({ error: 'confirm_required' });
     const r = await parseUpload(req.body);
     if (r.error) return res.status(400).json({ error: r.error });
-    const result = await tx(async (t) => applyPlan(t, r.plan));
-    res.json({ ...result, skipped: r.plan.summary.skipped });
-  } catch (e) { console.error('[dir import commit]', e.message); res.status(500).json({ error: 'internal' }); }
+    const s = r.plan.summary;
+    const result = await tx(async (t) => {
+      await snapshotDirectory(t, `가져오기 직전 백업 · 추가 ${s.added}·수정 ${s.updated}`);
+      return applyPlan(t, r.plan);
+    });
+    res.json({ ...result, skipped: s.skipped });
+  } catch (e) {
+    console.error('[dir import commit]', e.message);
+    res.status(500).json({ error: 'commit_failed', message: e.message });
+  }
+});
+
+// 마지막 가져오기 되돌리기 (직전 스냅샷 복원, 1회성)
+router.post('/directory/import/undo', requireAdmin, async (req, res) => {
+  try {
+    const result = await tx((t) => restoreLatestSnapshot(t));
+    if (!result.ok) return res.status(409).json({ error: result.error });
+    res.json(result);
+  } catch (e) {
+    console.error('[dir import undo]', e.message);
+    res.status(500).json({ error: 'undo_failed', message: e.message });
+  }
+});
+
+// 되돌리기 가능 여부(직전 스냅샷 정보)
+router.get('/directory/snapshot', requireAdmin, async (req, res) => {
+  const row = await db.prepare('SELECT id, created_at, summary FROM dir_snapshots ORDER BY id DESC LIMIT 1').get();
+  res.json(row ? { exists: true, created_at: row.created_at, summary: row.summary } : { exists: false });
 });
 
 // === 학과 정보 수정 신청 — 검토 큐 (관리자 전용) ===

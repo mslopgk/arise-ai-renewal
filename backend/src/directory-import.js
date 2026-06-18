@@ -288,3 +288,31 @@ export async function applyPlan(exec, plan) {
   }
   return { added, updated };
 }
+
+// === 가져오기 되돌리기 (스냅샷/복원) ===
+const DEPT_ALL = ['id', 'gyeyeol', 'name', 'recruit', 'homepage', 'hashtags', 'location', 'phone', 'bk21', 'bk21_name', 'bk21_url', 'intro', 'ord', 'image_mime', 'image_data', 'created_at'];
+const MAJOR_ALL = ['id', 'dept_id', 'name', 'recruit', 'homepage', 'hashtags', 'location', 'phone', 'bk21', 'bk21_name', 'bk21_url', 'intro', 'ord', 'image_mime', 'image_data'];
+
+export async function snapshotDirectory(exec, summary) {
+  await exec.run('DELETE FROM dir_snapshots');          // 최근 1건만 유지
+  const row = await exec.get('INSERT INTO dir_snapshots (summary) VALUES (?) RETURNING id', summary);
+  const sid = row.id;
+  await exec.run(`INSERT INTO dir_dept_backup (snapshot_id, ${DEPT_ALL.join(',')}) SELECT ?, ${DEPT_ALL.join(',')} FROM dir_departments`, sid);
+  await exec.run(`INSERT INTO dir_major_backup (snapshot_id, ${MAJOR_ALL.join(',')}) SELECT ?, ${MAJOR_ALL.join(',')} FROM dir_majors`, sid);
+  return sid;
+}
+
+export async function restoreLatestSnapshot(exec) {
+  const snap = await exec.get('SELECT id FROM dir_snapshots ORDER BY id DESC LIMIT 1');
+  if (!snap) return { ok: false, error: 'no_snapshot' };
+  const sid = snap.id;
+  await exec.run('DELETE FROM dir_departments');         // dir_majors는 FK CASCADE로 함께 삭제
+  await exec.run(`INSERT INTO dir_departments (${DEPT_ALL.join(',')}) SELECT ${DEPT_ALL.join(',')} FROM dir_dept_backup WHERE snapshot_id=?`, sid);
+  await exec.run(`INSERT INTO dir_majors (${MAJOR_ALL.join(',')}) SELECT ${MAJOR_ALL.join(',')} FROM dir_major_backup WHERE snapshot_id=?`, sid);
+  await exec.run(`SELECT setval(pg_get_serial_sequence('dir_departments','id'), GREATEST((SELECT COALESCE(MAX(id),1) FROM dir_departments), 1))`);
+  await exec.run(`SELECT setval(pg_get_serial_sequence('dir_majors','id'), GREATEST((SELECT COALESCE(MAX(id),1) FROM dir_majors), 1))`);
+  const depts = (await exec.get('SELECT COUNT(*)::int AS c FROM dir_departments')).c;
+  const majors = (await exec.get('SELECT COUNT(*)::int AS c FROM dir_majors')).c;
+  await exec.run('DELETE FROM dir_snapshots WHERE id=?', sid);
+  return { ok: true, depts, majors };
+}
