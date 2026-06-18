@@ -1,8 +1,12 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { db, listChangeRequests, getChangeRequest, getChangeRequestImage, countPendingChangeRequests, approveChangeRequest, rejectChangeRequest } from './db.js';
+import { db, getDirectoryTree, tx, listChangeRequests, getChangeRequest, getChangeRequestImage, countPendingChangeRequests, approveChangeRequest, rejectChangeRequest } from './db.js';
 import { mirrorResponseToSheet, getSheetStatus } from './sheets.js';
+import {
+  treeToRows, serializeCsv, decodeUpload, parseCsv,
+  headerIndex, rowToRecord, buildPlan, applyPlan,
+} from './directory-import.js';
 
 const router = express.Router();
 
@@ -280,6 +284,47 @@ router.put('/departments/:id/majors/:mid', requireAdmin, async (req, res) => {
 router.delete('/departments/:id/majors/:mid', requireAdmin, async (req, res) => {
   await db.prepare('DELETE FROM dir_majors WHERE id=? AND dept_id=?').run(req.params.mid, req.params.id);
   res.status(204).end();
+});
+
+// === 디렉터리 CSV 일괄 수정 (내보내기 / 미리보기 / 적용) ===
+router.get('/directory/export', requireAdmin, async (req, res) => {
+  const tree = await getDirectoryTree();
+  const csv = '﻿' + serializeCsv(treeToRows(tree)); // UTF-8 BOM
+  res.set('Content-Type', 'text/csv; charset=utf-8');
+  res.set('Content-Disposition', 'attachment; filename="directory.csv"');
+  res.send(csv);
+});
+
+// 업로드 본문(base64 CSV) → 파싱·검증·plan. 쓰기 없음.
+async function parseUpload(body) {
+  const buf = Buffer.from((body && body.csvBase64) || '', 'base64');
+  const { text, encoding, garbled } = decodeUpload(buf);
+  const rows = parseCsv(text);
+  if (!rows.length) return { error: 'empty' };
+  const idx = headerIndex(rows[0]);
+  const records = rows.slice(1)
+    .filter((r) => r.some((c) => (c || '').trim() !== '')) // 빈 줄 무시
+    .map((cells, i) => rowToRecord(idx, cells, i + 2));
+  const plan = buildPlan(records, await getDirectoryTree());
+  return { encoding, garbled, plan };
+}
+
+router.post('/directory/import/preview', requireAdmin, async (req, res) => {
+  try {
+    const r = await parseUpload(req.body);
+    if (r.error) return res.status(400).json({ error: r.error });
+    res.json({ encoding: r.encoding, garbled: r.garbled, summary: r.plan.summary, rows: r.plan.reports });
+  } catch (e) { console.error('[dir import preview]', e.message); res.status(500).json({ error: 'internal' }); }
+});
+
+router.post('/directory/import/commit', requireAdmin, async (req, res) => {
+  try {
+    if (!req.body || req.body.confirm !== true) return res.status(400).json({ error: 'confirm_required' });
+    const r = await parseUpload(req.body);
+    if (r.error) return res.status(400).json({ error: r.error });
+    const result = await tx(async (t) => applyPlan(t, r.plan));
+    res.json({ ...result, skipped: r.plan.summary.skipped });
+  } catch (e) { console.error('[dir import commit]', e.message); res.status(500).json({ error: 'internal' }); }
 });
 
 // === 학과 정보 수정 신청 — 검토 큐 (관리자 전용) ===
