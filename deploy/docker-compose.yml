@@ -1,6 +1,7 @@
-# pnu-grad 풀스택 (arise-ai.pusan.ac.kr) — 도면 v1.2 기반
-# 네트워크 3분할로 격리: edge(공개), data(DB/캐시 비공개), monitoring.
-# 자원제한은 ceiling(상한). 16core/23GB 노드에서 여유 충분.
+# arise 풀스택 (arise-ai.pusan.ac.kr) — 실배포 구성(nginx / was / postgres)
+# 네트워크 2분할: edge(공개), data(DB 비공개). 자원제한은 ceiling(상한).
+# 참고: redis 캐시 + 모니터링(prometheus/grafana/node-exporter/cadvisor) 설계(도면 v1.2)는
+#       현재 미배포라 제거함. 필요 시 git 이력(이 줄 도입 직전 커밋)에서 복원할 것.
 name: arise
 
 services:
@@ -60,89 +61,9 @@ services:
       resources:
         limits: { cpus: "2.0", memory: 2048M }
 
-  # ---------- Redis (공유 캐시 — 도면 인프라, 향후 사이트용) ----------
-  redis:
-    image: redis:7-alpine
-    restart: unless-stopped
-    command: ["redis-server", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru", "--save", ""]
-    volumes:
-      - redisdata:/data
-    networks: [data]
-    deploy:
-      resources:
-        limits: { cpus: "0.5", memory: 320M }
-
-  # ---------- 모니터링 ----------
-  prometheus:
-    image: prom/prometheus:v2.53.0
-    restart: unless-stopped
-    command:
-      - --config.file=/etc/prometheus/prometheus.yml
-      - --storage.tsdb.retention.time=15d
-    volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - promdata:/prometheus
-    ports:
-      - "127.0.0.1:9090:9090"   # loopback only — SSH 터널로 접근
-    networks: [monitoring]
-    deploy:
-      resources:
-        limits: { cpus: "1.0", memory: 1024M }
-
-  grafana:
-    image: grafana/grafana:11.1.0
-    restart: unless-stopped
-    environment:
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
-      GF_USERS_ALLOW_SIGN_UP: "false"
-      GF_SERVER_ROOT_URL: http://localhost:3000
-    volumes:
-      - grafanadata:/var/lib/grafana
-    ports:
-      - "127.0.0.1:3000:3000"   # loopback only — SSH 터널로 접근
-    depends_on: [prometheus]
-    networks: [monitoring]
-    deploy:
-      resources:
-        limits: { cpus: "1.0", memory: 512M }
-
-  node-exporter:
-    image: quay.io/prometheus/node-exporter:v1.8.2
-    restart: unless-stopped
-    command:
-      - --path.rootfs=/host
-    pid: host
-    volumes:
-      - /:/host:ro,rslave
-    networks: [monitoring]
-    deploy:
-      resources:
-        limits: { cpus: "0.3", memory: 128M }
-
-  cadvisor:
-    image: gcr.io/cadvisor/cadvisor:v0.49.1
-    restart: unless-stopped
-    privileged: true
-    devices:
-      - /dev/kmsg
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:ro
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-      - /dev/disk/:/dev/disk:ro
-    networks: [monitoring]
-    deploy:
-      resources:
-        limits: { cpus: "0.5", memory: 256M }
-
 networks:
   edge:
   data:
-  monitoring:
 
 volumes:
   pgdata:
-  redisdata:
-  promdata:
-  grafanadata:

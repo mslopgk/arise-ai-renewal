@@ -4,15 +4,15 @@
 
 ```
 브라우저 ─▶ 단일 Caddy ─▶ 단일 Express
-   /              → arise 게이트웨이 (arise.html)
-   /s30/*         → s30 (arise-ai 마케팅)
+   /              → React 게이트웨이 (Gateway.jsx). 레거시 /arise.html 은 nginx에서 / 로 301.
+   /s30/*         → (미배포 — s30 마케팅 사이트는 현재 빌드/배포되지 않음)
    /admission-*·/eligibility·/admin·/api·/auth → arise
 ```
 
 ## 1) arise 게이트웨이 (상위 랜딩)
 - **위치**: `frontend/public/arise.html` (+ `/logos`, `/media`)
 - **역할**: arise-ai 최상위 진입. 좌측 PNU 영상 + 우측 3카드 — ① s30 `about/#aura`(A.U.R.A 마스터플랜) · ② s30 `partners/#google`(Google 협력) · ③ arise 신청(`/admission.html`).
-- **URL**: `/` (prod: Express가 `dist/arise.html` 서빙 / dev: Vite `root-to-arise` 미들웨어)
+- **URL**: `/` (prod: Express가 React SPA `dist/index.html` 서빙 → `Gateway.jsx`. 레거시 정적 `arise.html`은 nginx에서 `/`로 301 리다이렉트 / dev: Vite `root-to-arise` 미들웨어). ⚠ s30은 미배포라 게이트웨이 카드의 `/s30/*` 링크는 React 게이트웨이 기준으로 갱신됨.
 - 별도 CONTEXT.md 없음(단일 페이지).
 
 ## 2) s30 — arise-ai 마케팅 사이트
