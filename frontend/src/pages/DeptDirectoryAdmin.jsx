@@ -91,6 +91,8 @@ export default function DeptDirectoryAdmin() {
   // === CSV 일괄 가져오기 ===
   async function onPickFile(e) {
     const file = e.target.files?.[0]; if (!file) return;
+    if (!file.name.toLowerCase().endsWith('.csv')) { alert('CSV 파일만 업로드할 수 있습니다.'); e.target.value = ''; return; }
+    if (file.size > 6 * 1024 * 1024) { alert('파일이 너무 큽니다 (최대 6MB).'); e.target.value = ''; return; }
     const bytes = new Uint8Array(await file.arrayBuffer());
     let bin = ''; for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
     const csvBase64 = btoa(bin);
@@ -192,7 +194,7 @@ function ImportPreviewModal({ preview, onClose, onCommit }) {
   const actionKo = (a) => (a === 'add' ? '추가' : a === 'update' ? '수정' : '오류');
   const kindKo = (k) => (k === 'dept' ? '학과' : k === 'major' ? '세부전공' : '-');
   return (
-    <div style={S.modalOverlay} onClick={applying ? undefined : onClose}>
+    <div style={S.modalOverlay} onClick={(applying || phase === 'error') ? undefined : onClose}>
       <style>{`@keyframes dda-spin{to{transform:rotate(360deg)}}`}</style>
       <div style={S.modal} onClick={(e) => e.stopPropagation()}>
         <div style={S.cardTitle}>CSV 가져오기 미리보기</div>

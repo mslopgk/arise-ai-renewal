@@ -214,3 +214,36 @@ test('restoreLatestSnapshot: 스냅샷 없으면 ok:false', async () => {
   const r = await restoreLatestSnapshot(ex);
   assert.deepEqual(r, { ok: false, error: 'no_snapshot' });
 });
+
+// --- 리뷰 보강: bk21 정리 / id 범위 / 신규 중복 / 세부전공 재지정 ---
+test('rowToRecord: bk21=N이면 bk21_name/url을 null로 정리', () => {
+  const i = headerIndex(HEADERS);
+  const cells = ['', '학과', '', '공학', 'X학과', 'Y', '', '', '', 'N', '사업단', 'http://b', '', ''];
+  const r = rowToRecord(i, cells, 2);
+  assert.equal(r.fields.bk21, false);
+  assert.equal(r.fields.bk21_name, null);
+  assert.equal(r.fields.bk21_url, null);
+});
+test('rowToRecord: 안전정수 초과 id → 오류, id=null', () => {
+  const i = headerIndex(HEADERS);
+  const cells = ['99999999999999999999', '학과', '', '공학', 'X', 'Y', '', '', '', 'N', '', '', '', ''];
+  const r = rowToRecord(i, cells, 2);
+  assert.ok(r.errors.some((e) => e.includes('정수')));
+  assert.equal(r.id, null);
+});
+test('buildPlan: 같은 파일 내 동일 신규 학과 중복 → 1건만 추가, 1건 오류', () => {
+  const i = headerIndex(HEADERS);
+  const mk = (line) => rowToRecord(i, ['', '학과', '', '공학', '중복학과', 'Y', '', '', '', 'N', '', '', '', ''], line);
+  const plan = buildPlan([mk(2), mk(3)], []);
+  assert.equal(plan.summary.added, 1);
+  assert.equal(plan.summary.skipped, 1);
+  assert.ok(plan.reports.some((rp) => rp.action === 'error' && rp.errors.some((e) => e.includes('중복'))));
+});
+test('buildPlan: 기존 세부전공 id를 신규 학과로 이동 시도 → 오류', () => {
+  const i = headerIndex(HEADERS);
+  const tree = [{ id: 1, gyeyeol: '공학', name: '기존학과', majors: [{ id: 7, name: '기존전공' }] }];
+  const dept = rowToRecord(i, ['', '학과', '', '공학', '새학과', 'Y', '', '', '', 'N', '', '', '', ''], 2);
+  const major = rowToRecord(i, ['7', '세부전공', '새학과', '', '기존전공', 'Y', '', '', '', 'N', '', '', '', ''], 3);
+  const plan = buildPlan([dept, major], tree);
+  assert.ok(plan.reports.some((rp) => rp.kind === 'major' && rp.action === 'error' && rp.errors.some((e) => e.includes('신규 학과로 이동'))));
+});

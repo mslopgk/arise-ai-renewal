@@ -119,7 +119,7 @@ export function rowToRecord(idx, cells, lineNo) {
 
   const idStr = get('id');
   const id = idStr ? Number(idStr) : null;
-  if (idStr && !Number.isInteger(id)) errors.push(`id가 숫자가 아닙니다 (입력: '${idStr}')`);
+  if (idStr && !Number.isSafeInteger(id)) errors.push(`id가 올바른 정수가 아닙니다 (입력: '${idStr}')`);
 
   const parent = get('parent');
   const gyeyeol = get('gyeyeol');
@@ -139,8 +139,10 @@ export function rowToRecord(idx, cells, lineNo) {
   const tags = parseHashtags(get('hashtags'));
   if (tags !== undefined) fields.hashtags = tags;
   for (const f of TEXT_FIELDS) { const val = get(f); if (val) fields[f] = val; }
+  // BK21 미참여(N)면 사업단 메타 정리(관리자 UI와 동일 의미) — UPDATE 시 기존 값도 비움
+  if (bk21 === false) { fields.bk21_name = null; fields.bk21_url = null; }
 
-  return { lineNo, id: Number.isInteger(id) ? id : null, kind, parent, gyeyeol, name, fields, errors };
+  return { lineNo, id: Number.isSafeInteger(id) ? id : null, kind, parent, gyeyeol, name, fields, errors };
 }
 
 // === diff/plan 계산 (하이브리드 매칭) ===
@@ -166,6 +168,8 @@ export function buildPlan(records, tree) {
   let added = 0, updated = 0, skipped = 0;
   let refSeq = 1;
   const newDeptRefByName = new Map();
+  const newDeptKeys = new Set();        // `${gyeyeol}␟${name}` — 같은 파일 내 신규 중복 탐지
+  const ambiguousNewNames = new Set();  // 이름만으로는 부모 해석이 모호한 신규 학과명
 
   const fail = (r, extra) => {
     skipped++;
@@ -186,6 +190,10 @@ export function buildPlan(records, tree) {
         ops.push({ kind: 'dept', op: 'update', id: match.id, body: r.fields });
         updated++; reports.push({ lineNo: r.lineNo, action: 'update', kind: 'dept', name: r.name, errors: [] });
       } else {
+        const key = `${r.gyeyeol}␟${r.name}`;
+        if (newDeptKeys.has(key)) { fail(r, `같은 파일에 동일한 신규 학과(${r.gyeyeol} · ${r.name})가 중복됩니다`); continue; }
+        newDeptKeys.add(key);
+        if (newDeptRefByName.has(r.name)) ambiguousNewNames.add(r.name); // 같은 이름의 신규 학과 → 부모 해석 모호
         const newRef = refSeq++;
         newDeptRefByName.set(r.name, newRef);
         ops.push({ kind: 'dept', op: 'insert', newRef, body: r.fields });
@@ -202,12 +210,16 @@ export function buildPlan(records, tree) {
     let parentId = null, parentNewRef = null;
     if (existing.length === 1) parentId = existing[0].id;
     else if (existing.length > 1) { fail(r, `상위학과 '${r.parent}'가 둘 이상입니다(계열로 모호)`); continue; }
-    else if (newDeptRefByName.has(r.parent)) parentNewRef = newDeptRefByName.get(r.parent);
+    else if (newDeptRefByName.has(r.parent)) {
+      if (ambiguousNewNames.has(r.parent)) { fail(r, `신규 상위학과 '${r.parent}' 이름이 중복되어 모호합니다`); continue; }
+      parentNewRef = newDeptRefByName.get(r.parent);
+    }
     else { fail(r, `상위학과 '${r.parent}'를 찾을 수 없습니다`); continue; }
 
     if (r.id != null) {
+      if (parentId == null) { fail(r, `기존 세부전공(id ${r.id})은 신규 학과로 이동할 수 없습니다`); continue; }
       const hit = majorById.get(r.id);
-      if (!hit || (parentId != null && hit.deptId !== parentId)) { fail(r, `id ${r.id} 세부전공을 상위학과 아래에서 찾을 수 없습니다`); continue; }
+      if (!hit || hit.deptId !== parentId) { fail(r, `id ${r.id} 세부전공을 상위학과 아래에서 찾을 수 없습니다`); continue; }
       ops.push({ kind: 'major', op: 'update', id: r.id, body: r.fields });
       updated++; reports.push({ lineNo: r.lineNo, action: 'update', kind: 'major', name: r.name, errors: [] });
     } else if (parentId != null && majorByKey.has(`${parentId}␟${r.name}`)) {
@@ -313,6 +325,7 @@ export async function restoreLatestSnapshot(exec) {
   await exec.run(`SELECT setval(pg_get_serial_sequence('dir_majors','id'), GREATEST((SELECT COALESCE(MAX(id),1) FROM dir_majors), 1))`);
   const depts = (await exec.get('SELECT COUNT(*)::int AS c FROM dir_departments')).c;
   const majors = (await exec.get('SELECT COUNT(*)::int AS c FROM dir_majors')).c;
+  // 1회성 복원: 스냅샷 삭제(FK CASCADE로 백업행 함께 정리) → 같은 가져오기를 다시 되돌릴 수 없음
   await exec.run('DELETE FROM dir_snapshots WHERE id=?', sid);
   return { ok: true, depts, majors };
 }

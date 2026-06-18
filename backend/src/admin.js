@@ -302,6 +302,7 @@ async function parseUpload(body) {
   const { text, encoding, garbled } = decodeUpload(buf);
   const rows = parseCsv(text);
   if (!rows.length) return { error: 'empty' };
+  if (rows.length > 5000) return { error: 'too_many_rows' }; // 디렉터리 규모(수백)를 크게 넘는 입력 차단
   const idx = headerIndex(rows[0]);
   const records = rows.slice(1)
     .filter((r) => r.some((c) => (c || '').trim() !== '')) // 빈 줄 무시
