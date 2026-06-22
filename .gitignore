@@ -28,3 +28,6 @@ caddy/config/
 # shadcn CLI 루트 툴링 (앱 아님)
 /package.json
 /package-lock.json
+
+# subagent-driven 진행 원장(스크래치)
+.superpowers/
