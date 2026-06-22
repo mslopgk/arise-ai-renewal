@@ -31,3 +31,6 @@ caddy/config/
 
 # subagent-driven 진행 원장(스크래치)
 .superpowers/
+
+# vite 설정 로드 임시파일
+frontend/vite.config.js.timestamp-*.mjs
