@@ -131,7 +131,7 @@
           <option value="8">8학기 (4학년 2학기)</option>
           <option value="9">9학기 이상</option>
         </select>
-        <div class="hint">지원은 <b>4학기 이상</b>이면 가능합니다(상한 폐지).</div>
+        <div class="hint">지원은 <b>4~7학기</b> 재학생만 가능합니다.</div>
       </div>
       <div class="field">
         <label for="gradSem">③ 졸업(연계 입학) 예정 시점<span class="req">*</span></label>
@@ -356,7 +356,7 @@
     var reqCum = requiredCum(band, sem);
     var reqR = Math.round(reqCum*10)/10;
 
-    var g1 = sem>=4;
+    var g1 = sem>=4 && sem<=7;
     var g2 = gpa>=3.0;
     var g3 = earned>=reqCum;
     var g4 = gpa>=gpaThr;
@@ -364,9 +364,9 @@
     var imminent = over8 ? false : (sem >= gradSem);
 
     var checks=[];
-    checks.push({state:g1?'ok':'warn', title:'이수 학기 (4학기 이상)',
-      detail:'현재 <b>'+(semLabel[sem]||sem+'학기')+'</b> · 기준 4학기 이상',
-      reason:g1?'':'아직 4학기 미만입니다. 4학기 이수 후 지원 가능합니다.'});
+    checks.push({state:g1?'ok':(sem>7?'no':'warn'), title:'이수 학기 (4~7학기)',
+      detail:'현재 <b>'+(semLabel[sem]||sem+'학기')+'</b> · 기준 4~7학기',
+      reason:g1?'':(sem>7?'8학기 이상은 신청 대상이 아닙니다. 4~7학기 재학생만 지원 가능합니다.':'아직 4학기 미만입니다. 4학기 이수 후 지원 가능합니다.')});
     checks.push({state:g2?'ok':(imminent?'no':'warn'), title:'지원 평점 (3.0 이상)',
       detail:'입력 <b>'+gpa.toFixed(2)+'</b> / 4.5 · 기준 3.00 이상',
       reason:g2?'':(imminent?'졸업 시점 기준 평점이 3.0에 미달합니다.':'현재 3.0 미만이나 남은 학기에 보완 여지가 있습니다.')});
@@ -380,6 +380,8 @@
     var allOk = g1&&g2&&g3&&g4;
     var tier;
     if(allOk) tier='pass';
+    // 신청 상한(7학기) 초과 = 신청 대상 아님 → 불가 (상한 폐지 전).
+    else if(sem>7) tier='fail';
     // 졸업 임박(보완 여지 없음) + 지원 평점(3.0) 미달 = 회복 불가 → 불가.
     // 수료학점 미달은 재수강·추가이수(졸업 연기 시 8학기 초과도 입학 가능)로 보완 가능하므로 불가가 아닌 '추후(maybe)'로 둔다.
     else if(imminent && gpa<3.0) tier='fail';
