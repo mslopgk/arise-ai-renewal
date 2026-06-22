@@ -5,6 +5,7 @@ import IntroView from './IntroView';
 import WhyGradView from './views/WhyGradView';
 import { EligibilityView } from './views/EligibilityView';
 import BenefitsView from './views/BenefitsView';
+import DepartmentsView from './views/DepartmentsView';
 
 const VIEW_KEYS = ['why-grad', 'eligibility', 'benefits', 'departments'];
 
@@ -74,11 +75,9 @@ export default function AdmissionPage() {
         onBack={showIntro}
       />
 
-      {/* departments — placeholder for Task 8 */}
-      <section
-        className={`view${view === 'departments' ? ' is-open' : ''}`}
-        id="view-departments"
-        aria-label="Departments"
+      <DepartmentsView
+        isOpen={view === 'departments'}
+        onBack={showIntro}
       />
     </>
   );
