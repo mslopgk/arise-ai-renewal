@@ -43,9 +43,9 @@ function QItem({ qKey, initialOpen, children }) {
   );
 }
 
-export default function WhyGradView({ onShowView, onApply, onBack }) {
+export default function WhyGradView({ onShowView, onApply, onBack, isOpen }) {
   return (
-    <section className="view" id="view-why-grad" aria-label="Why Graduate School">
+    <section className={`view${isOpen ? ' is-open' : ''}`} id="view-why-grad" aria-label="Why Graduate School">
       <div className="view-scroll edx">
         <div className="ed-stage">
 

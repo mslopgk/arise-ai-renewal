@@ -1,6 +1,6 @@
-export function EligibilityView({ onShowView, onApply, onBack }) {
+export function EligibilityView({ onShowView, onApply, onBack, isOpen }) {
   return (
-    <section className="view" id="view-eligibility" aria-label="Eligibility">
+    <section className={`view${isOpen ? ' is-open' : ''}`} id="view-eligibility" aria-label="Eligibility">
       <div className="view-scroll edx">
         <div className="ed-stage">
 

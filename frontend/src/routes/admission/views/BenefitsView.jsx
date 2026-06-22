@@ -1,6 +1,6 @@
-export default function BenefitsView({ onShowView, onApply, onBack }) {
+export default function BenefitsView({ onShowView, onApply, onBack, isOpen }) {
   return (
-    <section className="view" id="view-benefits" aria-label="Benefits & Scholarships">
+    <section className={`view${isOpen ? ' is-open' : ''}`} id="view-benefits" aria-label="Benefits & Scholarships">
       <div className="view-scroll edx">
         <div className="ed-stage">
 
