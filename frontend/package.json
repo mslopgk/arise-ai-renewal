@@ -8,7 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "parity": "node scripts/parity-check.mjs",
-    "test:parity": "node --test scripts/parity-check.test.mjs"
+    "test:parity": "node --test scripts/parity-check.test.mjs",
+    "test:routes": "node --test test/routes.smoke.mjs"
   },
   "dependencies": {
     "@fontsource-variable/archivo": "^5.2.8",
