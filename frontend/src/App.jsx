@@ -17,14 +17,6 @@ import BymonologAuraPage from './variants/bymonolog/aura/page.jsx';
 // Google variant (PNU × Google AI Ecosystem)
 import GooglePage from './variants/google/page.jsx';
 
-// Datarooms
-import Regional from './datarooms/Regional.jsx';
-import Comparison from './datarooms/Comparison.jsx';
-import Faculty from './datarooms/Faculty.jsx';
-import UGLinkDashboard from './datarooms/UGLinkDashboard.jsx';
-import UGLinkGuide from './datarooms/UGLinkGuide.jsx';
-import AXMajors from './datarooms/AXMajors.jsx';
-
 function RedirectToAdmission() {
   useEffect(() => { window.location.replace('/admission-v3-dark.html'); }, []);
   return <div className="container">이동 중...</div>;
@@ -54,14 +46,6 @@ export default function App() {
 
       {/* Google variant */}
       <Route path="/google" element={<GooglePage />} />
-
-      {/* Datarooms */}
-      <Route path="/dataroom/regional" element={<Regional />} />
-      <Route path="/dataroom/comparison" element={<Comparison />} />
-      <Route path="/dataroom/faculty" element={<Faculty />} />
-      <Route path="/dataroom/uglink-dashboard" element={<UGLinkDashboard />} />
-      <Route path="/dataroom/uglink-guide" element={<UGLinkGuide />} />
-      <Route path="/dataroom/ax-majors" element={<AXMajors />} />
 
       {/* Fallback to gateway */}
       <Route path="*" element={<Gateway />} />
