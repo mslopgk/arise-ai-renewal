@@ -95,6 +95,8 @@ docker save arise-was:latest | gzip > images.tar.gz
 ```
 새 컬럼/테이블은 부팅 시 `initSchema()`가 자동 반영(별도 마이그레이션 불필요).
 
+**부속 사이트(서브도메인)**: 같은 nginx·와일드카드 인증서로 부속 AI 기관 사이트도 호스팅 — `airc`/`axrc`(AI융합연구원)·`aiedu`/`axedu`(AI융합교육원)·`aigs`/`axgs`(AI대학원). 현재 "준비 중" 정적 플레이스홀더이며 공개 접속은 DNS A레코드(전산팀) 대기. 빌드물을 서버 `~/arise-stack/sites/<name>/`에 두면 즉시 서빙(상세 → DEPLOYMENT.md).
+
 **접속 제약·자격증명·운영 명령 등 상세는 → [`deploy/DEPLOYMENT.md`](./deploy/DEPLOYMENT.md)** (현행 인수인계 문서). 일반 설치 가이드는 [`DEPLOY.md`](./DEPLOY.md).
 
 ---

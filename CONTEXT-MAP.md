@@ -30,5 +30,5 @@
 
 ## 시스템 전역
 - **ADR**: `docs/adr/` (0001~0006). 0006 = 본 통합.
-- **배포**: 단일 Express + Caddy, 1 도메인. 현재 `arise-ai.pusan.ac.kr`, 향후 `arise-ai.pusan.ac.kr` 동일 서버 연결(+ OAuth redirect 재구성).
+- **배포**: 프로덕션은 단일 Express(`was`) + nginx(TLS 종단), arise 앱은 `arise-ai.pusan.ac.kr` 1 도메인. 같은 nginx가 부속 기관 사이트(airc/aiedu/aigs + ax* 별칭)도 서브도메인으로 호스팅하나, 이들은 이 모노레포 밖의 별도 정적 사이트다(상세 → [`deploy/DEPLOYMENT.md`](./deploy/DEPLOYMENT.md)).
 - **빌드(통합)**: `s30` 빌드 + `frontend` 빌드 → Express(prod)가 `/` + `/s30/` 전부 서빙.

@@ -1,6 +1,6 @@
 # pnu-grad 배포 인수인계 (arise-ai.pusan.ac.kr)
 
-최초 배포 2026-06-04 · **최종 현행화 2026-06-17** · 대상: `ubuntu@164.125.19.178:11097` (내부 10.125.19.178) · Ubuntu 24.04 폐쇄망
+최초 배포 2026-06-04 · **최종 현행화 2026-06-18** · 대상: `ubuntu@164.125.19.178:11097` (내부 10.125.19.178) · Ubuntu 24.04 폐쇄망
 
 ## 접근 제약 (중요)
 - **SSH(11097)는 화이트리스트된 IP에서만 접속 가능** — 일반 PC/외부망에선 timeout (2026-06-12 확인).
@@ -11,6 +11,7 @@
 - **Docker 29.5.3** 오프라인 설치(static binaries + systemd, 부팅 자동시작)
 - **스택**: 서버 `~/arise-stack/docker-compose.yml`이 원본 (레포의 docker-compose.https.yml은 8491bc3에서 삭제됨)
   = `nginx`(80/443 TLS 종단) + `was`(Express) + `postgres:16`. 컨테이너명 `arise-{nginx,was,postgres}-1`.
+  - 이 nginx 하나가 arise-ai **외에 부속 기관 서브도메인 사이트(airc/aiedu/aigs + ax* 별칭)도 호스팅**한다 → 아래 「부속 사이트」 절.
 - **was 이미지는 self-contained** (frontend dist 내장, bind-mount 없음; `sheets-sa.json`만 마운트) — 2026-06-08 전환.
 - **인증서: 부산대 공식 와일드카드** `*.pusan.ac.kr` (GlobalSign RSA OV, SAN: `*.pusan.ac.kr`/`*.pnu.edu`/`pusan.ac.kr`), **만료 2027-01-02**.
   - 위치: `~/arise-stack/certs/{fullchain.pem, privkey.pem}` (nginx 컨테이너에 `/etc/nginx/certs`로 마운트)
@@ -20,6 +21,22 @@
 - **Google OAuth: 설정 완료** — `/auth/google`이 Google로 302 (2026-06-12 확인). redirect URI `https://arise-ai.pusan.ac.kr/auth/google/callback`.
 - **HTTP(80) → HTTPS 301 강제 적용됨** (2026-06-12, 검증 완료: http→301 / https→200).
 - DB: PostgreSQL 마이그레이션·시드 완료. 볼륨 `arise_pgdata`.
+
+## 부속 사이트 (서브도메인) — airc / aiedu / aigs (2026-06-18 추가)
+같은 nginx·같은 와일드카드 인증서로 부속 AI 기관 사이트 3종을 서브도메인으로 호스팅한다. 각 사이트는 `ai*` / `ax*` **두 도메인이 같은 사이트(별칭)**.
+
+| 사이트 | 도메인(별칭) | nginx conf (canonical) | 정적 루트 (서버) |
+|---|---|---|---|
+| 장영실 AI융합연구원 | `airc` · `axrc` | `deploy/nginx/conf.d/site-airc.conf` | `~/arise-stack/sites/airc/` |
+| AI융합교육원 | `aiedu` · `axedu` | `deploy/nginx/conf.d/site-aiedu.conf` | `~/arise-stack/sites/aiedu/` |
+| AI대학원 | `aigs` · `axgs` | `deploy/nginx/conf.d/site-aigs.conf` | `~/arise-stack/sites/aigs/` |
+
+- **구조**: 각 `site-*.conf` = 80→443 301 + 443 정적 서버 블록(`root /etc/nginx/sites/<name>`, SPA `try_files`). compose가 `./sites` → `/etc/nginx/sites:ro` 로 마운트(`docker-compose.yml`).
+- **현재 내용**: "준비 중" 정적 플레이스홀더 (`deploy/sites/<name>/index.html`).
+- **실제 사이트 배포**: 빌드물(`dist/*`)을 서버 `~/arise-stack/sites/<name>/` 에 떨구면 즉시 서빙(정적/SPA, 재기동 불필요). 백엔드(Express 등)가 필요한 사이트면 해당 443 블록을 `proxy_pass` 로 교체.
+- **인증서**: arise-ai와 동일한 `*.pusan.ac.kr` 와일드카드 **재사용**(별도 발급 불필요). 갱신도 한 번에 전 도메인 반영.
+- **배포 방식**: nginx 설정만 바뀌므로 **이미지 재빌드 불필요** — `deploy/rollout-2026-06-12/` 같은 scp+백업+`nginx -t`+reload+자동롤백 패턴 사용. 레포 canonical(`site-*.conf`)과 서버 적용본을 항상 동기화.
+- **상태(2026-06-18)**: nginx 설정 프로덕션 적용·로컬 검증 완료(6개 도메인 200, arise-ai 무영향). ⚠ **공개 접속은 DNS A레코드가 있어야 — 전산팀 협조 대기**(미설정 시 외부에서 해석 안 됨).
 
 ## 해결된 문제: 내부망 관리자 로그인 무한 루프 (2026-06-12 분석·적용 완료)
 - **증상**: 부산대 내부망에서 관리자 로그인 → 다시 로그인창 무한 반복. 외부망에선 정상.
@@ -63,10 +80,11 @@ DB 접속: `docker compose exec postgres psql -U arise -d arise`
 - 레포 canonical(`deploy/nginx/conf.d/arise-ai.conf`)과 서버 적용본을 항상 동기화할 것.
 
 ## 파일 위치
-- 서버: 스택 `~/arise-stack/` (compose·`.env`·`certs/`·nginx conf.d·`backups/`) · 반입물 `~/arise-deploy/` · 소스 `~/pnu-grad/`
-- 레포: `deploy/` — compose 참고본·nginx conf(canonical)·검증 스크립트(`server-verify.sh`, `validate-stack.sh`, `smoke.mjs`)·self-signed placeholder 인증서(`certs/`, 로컬 검증용)
+- 서버: 스택 `~/arise-stack/` (compose·`.env`·`certs/`·nginx conf.d·부속 사이트 정적 루트 `sites/`·`backups/`) · 반입물 `~/arise-deploy/` · 소스 `~/pnu-grad/`
+- 레포: `deploy/` — compose 참고본·nginx conf(canonical: `arise-ai.conf` + 부속 사이트 `site-*.conf`)·부속 사이트 플레이스홀더(`sites/<name>/`)·검증 스크립트(`server-verify.sh`, `validate-stack.sh`, `smoke.mjs`)·self-signed placeholder 인증서(`certs/`, 로컬 검증용)
 
 ## 변경 이력
+- 2026-06-18: **부속 AI 기관 사이트 서브도메인 호스팅** 추가 — 장영실 AI융합연구원(airc·axrc)·AI융합교육원(aiedu·axedu)·AI대학원(aigs·axgs). 같은 nginx·와일드카드 인증서로 도메인별 `site-*.conf`(80→443 + 정적 루트), compose에 `./sites` 마운트. 현재 "준비 중" 플레이스홀더. 프로덕션 적용·검증 완료(6개 도메인 200, arise-ai 무영향). 공개 접속은 DNS A레코드(전산팀) 필요. 동시에 레거시 `/arise.html`→`/` 301, compose를 실배포(미배포 redis/모니터링 제거)와 일치화. (커밋 a594ebe, 7d8f2ec)
 - 2026-06-17: 「학과 정보 수정 신청」 2차 — **공개 제출(로그인 제거)·디렉터리 진입 FAB·학과/세부전공 삭제 요청 기능** 라이브 배포. `dir_change_requests`에 `action`·`note` 컬럼 추가(부팅 시 `ALTER ... IF NOT EXISTS`로 기존 테이블 호환). 검증: was healthy·공개 제출 422 검증·삭제 사유 필수·FAB/문구 라이브 반영. (코드 커밋 114c99c)
 - 2026-06-17: 「학과 정보 수정 신청」 기능 **라이브 배포 완료**. 신규 페이지 `/dept-edit-request`(@pusan.ac.kr OAuth 게이트) + 관리자 "학과 수정 신청" 검토 탭(승인 시 디렉터리 자동 반영). DB `dir_change_requests` 테이블 추가(`initSchema` 자동 생성 — 무중단 was 재생성, postgres·nginx·DB볼륨 보존). 디렉터리 안내 문구 2곳 수정(대제목 하단·검색창 옆 칩). 검증: was healthy·문구 반영·제출/관리자 API 정상. (코드 커밋 e7361b6)
 - 2026-06-12: nginx 301·디렉터리 정리 **라이브 적용 완료**(통합 번들 실행, 검증 통과). 일회성 스크립트(remediate-live, verify-migration, run-install)·구식 compose(prod.yml)·중복 단독 번들 2종 삭제.
