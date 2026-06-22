@@ -1,4 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
+
+const AdmissionPage = lazy(() => import('./routes/admission/AdmissionPage.jsx'));
 
 // Pages & Auth
 import Gateway from './pages/Gateway.jsx';
@@ -37,6 +40,9 @@ export default function App() {
 
       {/* admission (단계 3에서 element 교체) */}
       <Route path="/admission" element={<Placeholder name="AdmissionPage" />} />
+
+      {/* /admission-next — lazy-loaded separate CSS chunk (Task 6) */}
+      <Route path="/admission-next" element={<Suspense fallback={null}><AdmissionPage /></Suspense>} />
 
       {/* Admin */}
       <Route path="/admin/login" element={<AdminLogin />} />
