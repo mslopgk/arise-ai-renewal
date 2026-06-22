@@ -45,6 +45,13 @@ after(async () => { await browser?.close(); server?.close(); });
 async function gotoFinalPath(path) {
   const page = await browser.newPage();
   await page.goto(base + path, { waitUntil: 'networkidle0' });
+  // React Router의 클라이언트 Navigate(replace)가 networkidle0 이후에 실행될 수 있으므로
+  // URL이 안정될 때까지 최대 3초 대기 (SPA 리다이렉트 대응)
+  await page.waitForFunction(
+    (initial) => location.pathname !== initial || document.getElementById('root')?.children.length > 0,
+    { timeout: 3000, polling: 50 },
+    path
+  ).catch(() => {}); // timeout은 무시 — 최종 pathname을 그대로 반환
   // RR replace 후 클라이언트 URL
   const finalPath = await page.evaluate(() => location.pathname);
   const html = await page.content();
@@ -57,14 +64,12 @@ test('게이트웨이 /가 렌더된다', async () => {
   assert.equal(finalPath, '/');
 });
 
-// TODO: public/eligibility.html 삭제 후 GREEN (단계 2에서 skip 해제)
-test('/eligibility.html → /eligibility 로 리다이렉트', { skip: 'TODO: 대응 .html 삭제 후 GREEN' }, async () => {
+test('/eligibility.html → /eligibility 로 리다이렉트', async () => {
   const { finalPath } = await gotoFinalPath('/eligibility.html');
   assert.equal(finalPath, '/eligibility');
 });
 
-// TODO: public/scholarship.html 삭제 후 GREEN (단계 2에서 skip 해제)
-test('/scholarship.html → /scholarship 로 리다이렉트', { skip: 'TODO: 대응 .html 삭제 후 GREEN' }, async () => {
+test('/scholarship.html → /scholarship 로 리다이렉트', async () => {
   const { finalPath } = await gotoFinalPath('/scholarship.html');
   assert.equal(finalPath, '/scholarship');
 });

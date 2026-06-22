@@ -7,6 +7,10 @@ import AdminLogin from './pages/AdminLogin.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx';
 import DeptEditRequest from './pages/DeptEditRequest.jsx';
 
+// 계산기 2종 (Task 2.4 — 실제 컴포넌트로 교체)
+import EligibilityCheck from './routes/EligibilityCheck.jsx';
+import ScholarshipCheck from './routes/ScholarshipCheck.jsx';
+
 // Bymonolog variant
 import BymonologPage from './variants/bymonolog/page.jsx';
 import BymonologHubPage from './variants/bymonolog/hub/page.jsx';
@@ -16,8 +20,7 @@ import BymonologAuraPage from './variants/bymonolog/aura/page.jsx';
 // Google variant
 import GooglePage from './variants/google/page.jsx';
 
-// 단계 2·3에서 실제 컴포넌트로 교체할 placeholder.
-// (이 Task에서는 라우트 자리만 확보 — element 교체는 각 단계 담당)
+// 단계 3에서 실제 컴포넌트로 교체할 placeholder (admission 전용)
 function Placeholder({ name }) {
   return <div className="container">[{name}] 준비 중 — 단계별 이식 대기</div>;
 }
@@ -28,9 +31,9 @@ export default function App() {
       {/* Gateway */}
       <Route path="/" element={<Gateway />} />
 
-      {/* 계산기 2종 (단계 2에서 element 교체) */}
-      <Route path="/eligibility" element={<Placeholder name="EligibilityCheck" />} />
-      <Route path="/scholarship" element={<Placeholder name="ScholarshipCheck" />} />
+      {/* 계산기 2종 */}
+      <Route path="/eligibility" element={<EligibilityCheck />} />
+      <Route path="/scholarship" element={<ScholarshipCheck />} />
 
       {/* admission (단계 3에서 element 교체) */}
       <Route path="/admission" element={<Placeholder name="AdmissionPage" />} />
