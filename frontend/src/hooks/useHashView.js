@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-function viewFromHash(viewKeys) {
+export function viewFromHash(viewKeys) {
   const h = window.location.hash.replace(/^#/, '');
   return viewKeys.indexOf(h) >= 0 ? h : null; // null = intro
 }

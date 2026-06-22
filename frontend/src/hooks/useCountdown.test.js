@@ -22,7 +22,8 @@ describe('computeCountdown (admission intro 패리티)', () => {
   it('접수 중: 마감까지 카운트 + 라벨', () => {
     const now = new Date('2026-07-12T12:00:00+09:00').getTime();
     const r = computeCountdown(now, OPEN, CLOSE);
-    assert.strictEqual(r.dday.startsWith('D-'), true);
+    assert.strictEqual(r.dday, 'D-4');
+    assert.deepStrictEqual([r.h, r.m, r.s], ['99','99','99']);
     assert.strictEqual(r.statusLabel, 'Status · 접수 중 · 마감까지');
   });
   it('마감 후: "마감" + 00:00:00', () => {

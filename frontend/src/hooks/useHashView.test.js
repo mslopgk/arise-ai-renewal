@@ -1,40 +1,34 @@
-import { test, describe, before, afterEach } from 'node:test';
+import { test, describe, afterEach } from 'node:test';
 import assert from 'node:assert';
-
-// Pure helper function test (viewFromHash only - works under node:test)
-function viewFromHash(viewKeys) {
-  // Mock window.location.hash for node environment
-  const h = (global.testHash || '').replace(/^#/, '');
-  return viewKeys.indexOf(h) >= 0 ? h : null;
-}
+import { viewFromHash } from './useHashView.js';
 
 const KEYS = ['why-grad', 'eligibility', 'benefits', 'departments'];
 
 describe('viewFromHash', () => {
   afterEach(() => {
-    delete global.testHash;
+    delete globalThis.window;
   });
 
   test('no hash returns null (intro)', () => {
-    global.testHash = '';
+    globalThis.window = { location: { hash: '' } };
     const result = viewFromHash(KEYS);
     assert.strictEqual(result, null);
   });
 
   test('valid hash returns that view', () => {
-    global.testHash = '#departments';
+    globalThis.window = { location: { hash: '#departments' } };
     const result = viewFromHash(KEYS);
     assert.strictEqual(result, 'departments');
   });
 
   test('invalid hash returns null', () => {
-    global.testHash = '#invalid';
+    globalThis.window = { location: { hash: '#invalid' } };
     const result = viewFromHash(KEYS);
     assert.strictEqual(result, null);
   });
 
   test('hash indexOf lookup works', () => {
-    global.testHash = '#eligibility';
+    globalThis.window = { location: { hash: '#eligibility' } };
     const result = viewFromHash(KEYS);
     assert.strictEqual(result, 'eligibility');
   });
