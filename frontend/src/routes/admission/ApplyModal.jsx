@@ -3,12 +3,6 @@ import { mapAnswers } from '../../lib/apply-survey.js';
 
 const MAX_PICKS = 3;
 
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, (c) =>
-    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])
-  );
-}
-
 function buildPickText(dept, major) {
   return major ? dept + ' / ' + major : dept;
 }
@@ -209,7 +203,6 @@ export default function ApplyModal({ open, onClose, departments, onSubmitted, sh
       // Step 4: handle response (mirrors ~3218-3229)
       if (res.status === 201) {
         showToast('희망 제출이 완료되었습니다');
-        document.body.style.overflow = '';
         reset();
         onClose();
         if (onSubmitted) onSubmitted();

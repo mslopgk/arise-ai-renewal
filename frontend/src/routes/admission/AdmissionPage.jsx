@@ -96,6 +96,7 @@ function AdmissionPageInner() {
       const t = setTimeout(openApply, 200);
       return () => clearTimeout(t);
     }
+  // intentional mount-only: auto-open once on OAuth return; openApply is stable but re-runs not desired
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
