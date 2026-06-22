@@ -1,0 +1,84 @@
+/* EligibilityCheck.css
+   원본: eligibility.html 인라인 <style> lines 9-84
+   변경 사항: 셀렉터에 .elig-root 스코프 프리픽스 추가(값 1바이트 무변경).
+   :root → .elig-root (CSS 변수 선언)
+   * → .elig-root *
+   body → .elig-root (+ min-height:100vh 추가)
+   나머지 모든 셀렉터 → .elig-root <selector>
+*/
+
+.elig-root{
+  --pnu-blue:#1E40FF; --pnu-blue-deep:#0F1F8A;
+  --ink:#16181d; --muted:#6b7280; --line:#e5e7eb; --bg:#f5f6fa;
+  --ok:#0F7B5C; --no:#c0392b; --warn:#b7791f; --warn-bg:#fff7e6;
+}
+.elig-root *{box-sizing:border-box;margin:0;padding:0}
+.elig-root{font-family:'Pretendard Variable',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh}
+.elig-root .wrap{max-width:760px;margin:0 auto;padding:32px 20px 80px}
+.elig-root header{display:flex;align-items:center;gap:14px;margin-bottom:28px}
+.elig-root header img{height:34px;width:auto;background:#fff;padding:5px 9px;border-radius:6px;border:1px solid var(--line)}
+.elig-root .brand .kicker{font-size:12px;letter-spacing:0.18em;color:var(--pnu-blue);text-transform:uppercase;font-weight:700}
+.elig-root .brand .org{font-size:13px;color:var(--muted)}
+.elig-root h1{font-size:clamp(24px,4vw,32px);font-weight:800;line-height:1.25;letter-spacing:-0.02em;margin-bottom:10px}
+.elig-root .lead{color:var(--muted);font-size:15px;max-width:640px;margin-bottom:8px}
+.elig-root .privacy{display:inline-flex;align-items:center;gap:7px;margin-top:14px;font-size:13px;color:var(--ok);background:rgba(15,123,92,.08);border:1px solid rgba(15,123,92,.25);padding:7px 13px;border-radius:999px;font-weight:600}
+.elig-root .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:26px;margin-top:24px;box-shadow:0 1px 3px rgba(16,24,40,.04)}
+.elig-root .card h2{font-size:17px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.elig-root .card .sub{font-size:13px;color:var(--muted);margin-bottom:20px}
+.elig-root .step-no{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--pnu-blue);color:#fff;font-size:12px;font-weight:700}
+.elig-root .field{margin-bottom:18px}
+.elig-root .field:last-child{margin-bottom:0}
+.elig-root label{display:block;font-size:14px;font-weight:600;margin-bottom:6px}
+.elig-root label .req{color:var(--pnu-blue);margin-left:3px}
+.elig-root .hint{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.5}
+.elig-root .hint a{color:var(--pnu-blue);text-decoration:none;border-bottom:1px solid rgba(30,64,255,.3)}
+.elig-root select,.elig-root input[type=number],.elig-root input[type=text]{width:100%;padding:11px 13px;font-size:15px;font-family:inherit;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:10px;outline:none;transition:border-color .15s,box-shadow .15s}
+.elig-root select:focus,.elig-root input:focus{border-color:var(--pnu-blue);box-shadow:0 0 0 3px rgba(30,64,255,.12)}
+.elig-root .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:520px){.elig-root .row{grid-template-columns:1fr}}
+.elig-root .band-pill{display:none;margin-top:8px;font-size:12.5px;font-weight:600;color:var(--pnu-blue);background:rgba(30,64,255,.07);border:1px solid rgba(30,64,255,.2);border-radius:8px;padding:8px 11px}
+.elig-root .band-pill.show{display:block}
+.elig-root .linkish{background:none;border:none;color:var(--pnu-blue);font:inherit;font-size:12.5px;cursor:pointer;text-decoration:underline;padding:0;margin-top:8px}
+.elig-root .btn{width:100%;margin-top:8px;padding:14px;font-size:16px;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--pnu-blue) 0%,var(--pnu-blue-deep) 100%);border:none;border-radius:12px;cursor:pointer;transition:transform .12s,box-shadow .12s}
+.elig-root .btn:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(30,64,255,.28)}
+.elig-root .btn:active{transform:translateY(0)}
+.elig-root #result{display:none;margin-top:24px}
+.elig-root .verdict{border-radius:16px;padding:22px 24px;color:#fff;margin-bottom:18px}
+.elig-root .verdict.pass{background:linear-gradient(135deg,#0F7B5C 0%,#0a5a43 100%)}
+.elig-root .verdict.maybe{background:linear-gradient(135deg,#d98a09 0%,#9a6b00 100%)}
+.elig-root .verdict.fail{background:linear-gradient(135deg,#c0392b 0%,#922b21 100%)}
+.elig-root .verdict .vtag{font-size:12px;letter-spacing:.16em;text-transform:uppercase;opacity:.85;font-weight:700}
+.elig-root .verdict .vtitle{font-size:24px;font-weight:800;margin-top:4px}
+.elig-root .verdict .vmsg{font-size:14px;opacity:.95;margin-top:8px;line-height:1.55}
+.elig-root .checklist{list-style:none}
+.elig-root .check{display:flex;gap:13px;padding:15px 0;border-bottom:1px solid var(--line)}
+.elig-root .check:last-child{border-bottom:none}
+.elig-root .ico{flex:0 0 auto;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;margin-top:1px}
+.elig-root .ico.ok{background:var(--ok)} .elig-root .ico.no{background:var(--no)} .elig-root .ico.warn{background:var(--warn)}
+.elig-root .check .ctitle{font-size:14.5px;font-weight:700}
+.elig-root .check .cdetail{font-size:13px;color:var(--muted);margin-top:3px}
+.elig-root .check .cdetail b{color:var(--ink)}
+.elig-root .reason{font-weight:600;margin-top:4px}
+.elig-root .reason.no{color:var(--no)} .elig-root .reason.warn{color:var(--warn)}
+.elig-root .schol-note{margin-top:14px;font-size:13px;color:var(--warn);background:var(--warn-bg);border:1px solid #f0dca0;border-radius:10px;padding:11px 14px;line-height:1.5}
+.elig-root .schol-note b{color:#7a5400}
+.elig-root .reco-note{margin-top:12px;font-size:12.5px;color:var(--muted);background:#f7f8fb;border:1px solid var(--line);border-radius:10px;padding:11px 14px;line-height:1.55}
+.elig-root .reco-note b{color:var(--ink)}
+.elig-root .consult{margin-top:20px;display:flex;gap:20px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px 22px;flex-wrap:wrap}
+.elig-root .consult-txt{flex:1;min-width:220px}
+.elig-root .consult-txt strong{display:block;font-size:16px;font-weight:800;color:var(--ink)}
+.elig-root .consult-txt p{font-size:13px;color:var(--muted);margin:6px 0 12px;line-height:1.55}
+.elig-root .consult-btn{display:inline-flex;align-items:center;gap:7px;padding:11px 18px;border-radius:10px;background:var(--pnu-blue);color:#fff;font-weight:700;font-size:14px;text-decoration:none}
+.elig-root .consult-btn:hover{background:var(--pnu-blue-deep)}
+.elig-root .consult-tel{font-size:12.5px;color:var(--muted);margin-top:10px}
+.elig-root .consult-qr{flex:0 0 auto;text-align:center}
+.elig-root .consult-qr img{width:104px;height:104px;border:1px solid var(--line);border-radius:10px;background:#fff;padding:6px}
+.elig-root .consult-qr span{display:block;font-size:11px;color:var(--muted);margin-top:6px;line-height:1.35}
+.elig-root .next{margin-top:18px;text-align:center}
+.elig-root .next a{display:inline-flex;align-items:center;gap:7px;padding:12px 22px;border-radius:11px;background:var(--ok);color:#fff;font-weight:700;text-decoration:none;font-size:14px}
+.elig-root .notice{margin-top:22px;background:var(--warn-bg);border:1px solid #f0dca0;border-radius:12px;padding:16px 18px;font-size:13px;color:var(--warn);line-height:1.6}
+.elig-root .notice b{color:#7a5400}
+.elig-root .err{color:var(--no);font-size:13px;margin-top:8px;display:none;font-weight:600}
+.elig-root footer{margin-top:40px;text-align:center;font-size:13px;color:var(--muted)}
+.elig-root footer a{color:var(--pnu-blue);text-decoration:none}
+.elig-root .hidden{display:none!important}
