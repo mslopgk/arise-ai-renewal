@@ -75,8 +75,7 @@ test('/admission-v3-dark.html → /admission 로 리다이렉트', { skip: 'TODO
   assert.equal(finalPath, '/admission');
 });
 
-// TODO: public/arise.html 삭제 후 GREEN (Task B에서 skip 해제)
-test('/arise.html → / 로 리다이렉트(보강)', { skip: 'TODO: 대응 .html 삭제 후 GREEN' }, async () => {
+test('/arise.html → / 로 리다이렉트(보강)', async () => {
   const { finalPath } = await gotoFinalPath('/arise.html');
   assert.equal(finalPath, '/');
 });

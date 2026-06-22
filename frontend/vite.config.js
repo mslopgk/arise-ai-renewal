@@ -14,22 +14,6 @@ const MIME = {
   '.mp4': 'video/mp4', '.webm': 'video/webm', '.woff': 'font/woff', '.woff2': 'font/woff2',
 };
 
-// dev 전용: 루트(/) → arise-ai 게이트웨이(arise.html). 빌드/프로덕션엔 영향 없음.
-const rootToArise = {
-  name: 'root-to-arise',
-  configureServer(server) {
-    server.middlewares.use((req, res, next) => {
-      const path = (req.url || '').split('?')[0];
-      if (path === '/' || path === '/index.html') {
-        res.statusCode = 302;
-        res.setHeader('Location', '/arise.html');
-        return res.end();
-      }
-      next();
-    });
-  },
-};
-
 // dev 전용: /s30/* 를 s30/dist 정적 서빙(통합 미리보기). 프로덕션은 Express가 동일 역할.
 const serveS30 = {
   name: 'serve-s30',
