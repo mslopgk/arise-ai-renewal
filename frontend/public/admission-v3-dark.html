@@ -1740,7 +1740,7 @@
         <p class="desc rise d3">학부 재학 중 대학원 과목을 미리 이수하고, 석사·박사 학위를 단기간에 취득하는 패스트 트랙입니다.</p>
         <div class="cd rise d4" aria-label="원서접수 카운트다운">
           <span class="dday" id="dday">D-—</span>
-          <span class="info"><b>원서접수 2026.07 예정</b>Status · 접수 예정</span>
+          <span class="info"><b id="cd-title">원서접수 2026.7.9(목)~7.16(목)</b><span id="cd-status">Status · 접수 예정</span></span>
           <span class="clock"><i>T-</i><span id="cd-h">--</span>:<span id="cd-m">--</span>:<span id="cd-s">--</span></span>
         </div>
       </div>
@@ -1784,14 +1784,33 @@
 
   <script>
   (function(){
-    var target=new Date('2026-07-01T09:00:00+09:00').getTime();
+    // 원서접수 2026.7.9(목)~7.16(목). 접수 전엔 시작일까지, 접수 중엔 마감(7.16 23:59)까지 카운트다운.
+    var openTime  = new Date('2026-07-09T09:00:00+09:00').getTime();
+    var closeTime = new Date('2026-07-16T23:59:59+09:00').getTime();
     var p=function(n){return String(Math.max(0,n)).padStart(2,'0');};
-    var dday=document.getElementById('dday'),h=document.getElementById('cd-h'),m=document.getElementById('cd-m'),s=document.getElementById('cd-s');
+    var dday=document.getElementById('dday'),h=document.getElementById('cd-h'),m=document.getElementById('cd-m'),s=document.getElementById('cd-s'),
+        status=document.getElementById('cd-status');
     if(!dday) return;
     function tick(){
-      var t=Math.max(0,target-Date.now());
-      dday.textContent='D-00';
-      h.textContent=p(Math.floor(t/3600000)%24);m.textContent=p(Math.floor(t/60000)%60);s.textContent=p(Math.floor(t/1000)%60);
+      var now=Date.now(), target, label;
+      if(now<openTime){ target=openTime; label='접수 시작까지'; }
+      else if(now<=closeTime){ target=closeTime; label='접수 중 · 마감까지'; }
+      else { target=null; label='접수 마감'; }
+      if(target===null){
+        dday.textContent='마감'; h.textContent=m.textContent=s.textContent='00';
+      } else {
+        var t=Math.max(0,target-now);
+        dday.textContent='D-'+Math.floor(t/86400000);
+        var totalH=Math.floor(t/3600000);
+        if(totalH>=100){            // 100시간 이상 남으면 시계는 대기 표시(99:99:99)
+          h.textContent=m.textContent=s.textContent='99';
+        } else {                    // 100시간 미만부터 실제 카운트다운(총 시:분:초, 시는 0~99)
+          h.textContent=p(totalH);
+          m.textContent=p(Math.floor(t/60000)%60);
+          s.textContent=p(Math.floor(t/1000)%60);
+        }
+      }
+      if(status) status.textContent='Status · '+label;
     }
     tick();setInterval(tick,1000);
   })();
@@ -1874,7 +1893,7 @@
     <div class="cta">
       <div class="wrap">
         <h2>준비됐다면, <em>가장 빠른 시점</em>에 시작하세요.</h2>
-        <p>학부 4학년 · 연계 진입 · 2026년 7월 접수 예정</p>
+        <p>학부 4학년 · 연계 진입 · 2026.7.9~7.16 원서접수</p>
         <div class="row">
           <button type="button" class="apply" data-apply>희망 전공 담기 및 알람신청 <span class="a">→</span></button>
           <button type="button" class="apply ghostbtn" data-view="departments">대학원 학과 보기</button>
@@ -2009,7 +2028,7 @@
     <div class="cta">
       <div class="wrap">
         <h2>자격이 된다면, <em>학과부터</em> 살펴보세요.</h2>
-        <p>2026년 7월 접수 예정 · 무시험 특별전형</p>
+        <p>2026.7.9~7.16 원서접수 · 무시험 특별전형</p>
         <div class="row">
           <button type="button" class="apply" data-view="departments">학과 디렉터리 <span class="a">→</span></button>
           <a class="apply ghostbtn" href="/eligibility.html">내 지원 자격 확인하기</a>
@@ -2109,14 +2128,14 @@
             <div class="note">
               <h4>지급 기준</h4>
               <ul>
-                <li>8학기 이수자(정규졸업 예정자)는 학사 졸업 <strong>전체평점평균 3.8 이상</strong>(소수점 셋째자리 절사)일 경우에만 지급</li>
+                <li>8학기 이수자(정규졸업 예정자)는 학사 졸업 <strong>전체평점평균 3.8 이상</strong>일 경우에만 지급</li>
                 <li>등록기간에 자비 등록 후 학기 중 개별 계좌로 지급</li>
               </ul>
             </div>
             <div class="note warn">
               <h4>지급 제외</h4>
               <ul>
-                <li><strong>8학기 초과 졸업자는 장학금 지급 대상에서 제외</strong> (규정 개정 신설 — 입학 자격에는 영향 없음)</li>
+                <li><strong>8학기 초과 졸업자는 장학금 지급 대상에서 제외</strong></li>
                 <li><strong>계약학과 선발 학생</strong>은 지급 제외</li>
               </ul>
             </div>
@@ -3290,7 +3309,7 @@
 
   /* ---------- Countdown ---------- */
   (function(){
-    var deadline = new Date('2026-01-14T23:59:59+09:00').getTime();
+    var deadline = new Date('2026-07-16T23:59:59+09:00').getTime();
     var dEl = document.getElementById('cd-d'), hEl = document.getElementById('cd-h'),
         mEl = document.getElementById('cd-m'), sEl = document.getElementById('cd-s');
     if(!dEl) return;

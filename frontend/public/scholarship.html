@@ -216,7 +216,7 @@
   function judgeReg(gradSemRaw, gpa, contract){
     var amt='등록금 전액', meta=(track==='msp'?'석박통합: 석사 2·3학기 + 박사 5·6학기':'석사 2·3학기');
     if(contract==='y') return {tier:'no', amt:amt, meta:meta, reason:'계약학과 선발 학생은 연계과정 장학금 지급 대상에서 제외됩니다.'};
-    if(gradSemRaw==='over8') return {tier:'no', amt:amt, meta:meta, reason:'8학기 초과 졸업자는 장학금 지급 대상에서 제외됩니다(규정 개정 신설 — 입학 자격에는 영향 없음).'};
+    if(gradSemRaw==='over8') return {tier:'no', amt:amt, meta:meta, reason:'8학기 초과 졸업자는 장학금 지급 대상에서 제외됩니다.'};
     if(gradSemRaw==='8'){
       if(isNaN(gpa)||gpa<3.8) return {tier:'cond', amt:amt, meta:meta, reason:'정규 8학기 졸업 예정자는 학사 졸업 전체평점평균 <b>3.8 이상</b>일 때만 지급됩니다'+(isNaN(gpa)?'.':(' (현재 '+gpa.toFixed(2)+'). 졸업 시점까지 3.8↑ 달성 시 해당.'))};
       return {tier:'ok', amt:amt, meta:meta, reason:'정규 8학기 졸업 + 학사평점 3.8 이상 — 등록금 전액 지급 대상.'};

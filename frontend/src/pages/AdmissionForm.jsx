@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../api';
 import './admission.css';
 
-const DEADLINE_TIME = new Date('2026-01-14T23:59:59+09:00').getTime();
+const DEADLINE_TIME = new Date('2026-07-16T23:59:59+09:00').getTime();
 
 export default function AdmissionForm() {
   const navigate = useNavigate();

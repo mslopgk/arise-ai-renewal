@@ -21,7 +21,7 @@ export default function UGLinkGuide() {
     },
     {
       q: 'Q. 연계과정 장학금 수혜 조건인 평점 3.8 이상은 졸업 평점인가요?',
-      a: 'A. 네, 그렇습니다. 8학기 이수자(정규졸업 예정자)의 경우 학사과정 최종 졸업 평점평균이 3.8 이상(소수점 셋째자리 절사)이어야 대학원 진학 후 2, 3학기에 등록금 전액 장학금을 지급받을 수 있습니다. 성적 미달 시 장학금 지급 대상에서 제외되므로 성적 관리가 매우 중요합니다.'
+      a: 'A. 네, 그렇습니다. 8학기 이수자(정규졸업 예정자)의 경우 학사과정 최종 졸업 평점평균이 3.8 이상이어야 대학원 진학 후 2, 3학기에 등록금 전액 장학금을 지급받을 수 있습니다. 성적 미달 시 장학금 지급 대상에서 제외되므로 성적 관리가 매우 중요합니다.'
     },
     {
       q: 'Q. 연계과정에 합격한 후 중도 포기할 수 있나요?',
@@ -141,7 +141,7 @@ export default function UGLinkGuide() {
           <h1>🎓 학·석사 및 학·석박사통합 연계과정 안내</h1>
           <p>
             학부 재학 중 대학원 교과목을 이수하여 석사·박사 학위를 단기간에 취득하는 특별 연계 제도입니다.<br />
-            <span className="gold">모집 기간: 2026. 1. 7.(수) ~ 1. 14.(수)</span>
+            <span className="gold">원서접수: 2026. 7. 9.(목) ~ 7. 16.(목)</span>
           </p>
         </div>
 
@@ -238,7 +238,7 @@ export default function UGLinkGuide() {
               </tbody>
             </table>
             <div className="schol-note">
-              ※ 졸업 평점평균 3.8 이상(소수점 셋째자리 절사)을 유지해야 장학금이 지급됩니다.<br />
+              ※ 졸업 평점평균 3.8 이상을 유지해야 장학금이 지급됩니다.<br />
               ※ 계약학과 등 일부 학생은 제외될 수 있습니다.
             </div>
           </div>
@@ -267,17 +267,17 @@ export default function UGLinkGuide() {
           <div className="timeline">
             <div className="timeline-item">
               <div className="timeline-title">1단계. 지원서 작성 및 제출</div>
-              <div className="timeline-date">2026. 1. 7. (수) ~ 1. 14. (수) 18:00까지</div>
+              <div className="timeline-date">2026. 7. 9. (목) ~ 7. 16. (목) 23:59까지</div>
               <div className="timeline-desc">소속 학과 행정실 또는 대학원 지원 학과 사무실로 지원서 및 추천서를 제출합니다.</div>
             </div>
             <div className="timeline-item">
               <div className="timeline-title">2단계. 서류 심사 및 면접</div>
-              <div className="timeline-date">2026. 1. 19. (월) ~ 1. 23. (금)</div>
+              <div className="timeline-date">추후 공지</div>
               <div className="timeline-desc">각 학과별 전형 기준에 따라 서류 심사 및 면접 고사를 진행합니다.</div>
             </div>
             <div className="timeline-item">
               <div className="timeline-title">3단계. 합격자 발표</div>
-              <div className="timeline-date">2026. 2. 6. (금) 예정</div>
+              <div className="timeline-date">추후 공지</div>
               <div className="timeline-desc">부산대학교 대학원 홈페이지 및 소속 단과대학을 통해 합격자가 공고됩니다.</div>
             </div>
           </div>
