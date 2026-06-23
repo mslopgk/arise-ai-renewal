@@ -112,7 +112,7 @@ function AdmissionPageInner() {
   }, []);
 
   return (
-    <>
+    <div className="adm-v3-dark">
       {/* Intro — always mounted; hidden via display:none when a view is open */}
       <main id="intro" style={{ display: view === null ? '' : 'none' }}>
         <IntroView onShowView={showView} onApply={openApply} onBack={showIntro} />
@@ -180,7 +180,7 @@ function AdmissionPageInner() {
         </svg>
         <span>의견·질문</span>
       </a>
-    </>
+    </div>
   );
 }
 

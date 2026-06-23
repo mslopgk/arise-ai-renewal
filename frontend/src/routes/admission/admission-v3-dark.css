@@ -1,4 +1,4 @@
-﻿  :root{
+﻿  .adm-v3-dark{
     /* === 시안 3: 다크 + 앰버 액센트 (프리미엄/몰입형) === */
     --bg:#08080A;
     --bg-2:#0F0F12;
@@ -27,9 +27,9 @@
     --ease-out:cubic-bezier(.16,1,.3,1);
     --ease-spring:cubic-bezier(.34,1.56,.64,1);
   }
-  *{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-behavior:smooth}
-  body{
+  :where(.adm-v3-dark) *{box-sizing:border-box;margin:0;padding:0}
+  .adm-v3-dark{scroll-behavior:smooth;box-sizing:border-box;margin:0;padding:0}
+  .adm-v3-dark{
     font-family:var(--font-sans);
     color:var(--ink-2);
     background:var(--bg);
@@ -38,10 +38,10 @@
     text-rendering:optimizeLegibility;
     overflow-x:hidden;
   }
-  a{color:inherit;text-decoration:none}
-  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
-  img{max-width:100%;display:block}
-  ::selection{background:var(--amber);color:var(--bg)}
+  :where(.adm-v3-dark) a{color:inherit;text-decoration:none}
+  :where(.adm-v3-dark) button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  :where(.adm-v3-dark) img{max-width:100%;display:block}
+  :where(.adm-v3-dark) ::selection{background:var(--amber);color:var(--bg)}
 
   .container{max-width:1280px;margin:0 auto;padding:0 32px}
   @media (max-width:768px){.container{padding:0 20px}}
@@ -780,7 +780,7 @@
   .final-cta .hero-cta-group{justify-content:center}
 
   /* ===== Footer ===== */
-  footer{
+  :where(.adm-v3-dark) footer{
     background:var(--bg-2);
     color:var(--ink-3);
     padding:64px 0 40px;
@@ -1080,7 +1080,7 @@
   .reveal.in{opacity:1;transform:translateY(0)}
 
   @media (prefers-reduced-motion: reduce){
-    *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+    :where(.adm-v3-dark) *, :where(.adm-v3-dark) *::before, :where(.adm-v3-dark) *::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
   }
 
   /* ===================================================================
@@ -1269,13 +1269,13 @@
     -webkit-mask:radial-gradient(120% 70% at 50% 0%, #000 25%, transparent 72%); mask:radial-gradient(120% 70% at 50% 0%, #000 25%, transparent 72%); }
 
   /* 필름 그레인 (전역) */
-  body::after{ content:''; position:fixed; inset:0; z-index:9998; pointer-events:none; opacity:.045; mix-blend-mode:overlay;
+  .adm-v3-dark::after{ content:''; position:fixed; inset:0; z-index:9998; pointer-events:none; opacity:.045; mix-blend-mode:overlay;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
 
   /* 마우스 스포트라이트 (JS가 .fx-spot 삽입) — 화면 위에서 screen 블렌드로 텍스트 가독성 유지 */
   .fx-spot{ position:absolute; inset:0; z-index:3; pointer-events:none; border-radius:inherit; opacity:0; transition:opacity .35s var(--ease-out); mix-blend-mode:screen;
     background:radial-gradient(240px circle at var(--mx,50%) var(--my,50%), rgba(255,184,0,.16), transparent 60%); }
-  *:hover > .fx-spot{ opacity:1; }
+  :where(.adm-v3-dark) *:hover > .fx-spot{ opacity:1; }
 
   /* 회전 글로우 보더 */
   .fx-glow{ position:relative; }

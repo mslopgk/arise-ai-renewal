@@ -23,11 +23,6 @@ import BymonologAuraPage from './variants/bymonolog/aura/page.jsx';
 // Google variant
 import GooglePage from './variants/google/page.jsx';
 
-// 단계 3에서 실제 컴포넌트로 교체할 placeholder (admission 전용)
-function Placeholder({ name }) {
-  return <div className="container">[{name}] 준비 중 — 단계별 이식 대기</div>;
-}
-
 export default function App() {
   return (
     <Routes>
@@ -38,11 +33,8 @@ export default function App() {
       <Route path="/eligibility" element={<EligibilityCheck />} />
       <Route path="/scholarship" element={<ScholarshipCheck />} />
 
-      {/* admission (단계 3에서 element 교체) */}
-      <Route path="/admission" element={<Placeholder name="AdmissionPage" />} />
-
-      {/* /admission-next — lazy-loaded separate CSS chunk (Task 6) */}
-      <Route path="/admission-next" element={<Suspense fallback={null}><AdmissionPage /></Suspense>} />
+      {/* admission — lazy-loaded; CSS는 별도 청크(.adm-v3-dark 스코프, 전역 누출 차단) */}
+      <Route path="/admission" element={<Suspense fallback={null}><AdmissionPage /></Suspense>} />
 
       {/* Admin */}
       <Route path="/admin/login" element={<AdminLogin />} />
