@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import './admission-v3-dark.css';
 import { useHashView } from '../../hooks/useHashView';
+import { useFxDecorations } from '../../hooks/useFxDecorations';
 import { DepartmentsProvider, useDepartments } from '../../hooks/useDepartments';
 import { buildReturnTo } from '../../lib/apply-survey.js';
 import IntroView from './IntroView';
@@ -18,6 +19,9 @@ const FEEDBACK_FORM_URL = 'https://forms.gle/CNRTG8U52ZDzmi5u8';
 function AdmissionPageInner() {
   const { view, showView, showIntro } = useHashView(VIEW_KEYS);
   const { departments } = useDepartments();
+
+  // FX 시각 장식 (원본 3357-3392) — document 스코프, 마운트 후 1회
+  useFxDecorations();
 
   // ApplyModal open state (Task 9)
   const [applyOpen, setApplyOpen] = useState(false);
@@ -41,9 +45,6 @@ function AdmissionPageInner() {
     window.showToast = showToast;
     return () => { delete window.showToast; };
   }, [showToast]);
-
-  // Ref to the intro video element rendered by IntroView
-  const videoRef = useRef(null);
 
   // Play/pause intro video based on whether a view is open (mirror original setIntroVideo)
   useEffect(() => {
