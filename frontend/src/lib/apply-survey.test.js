@@ -34,7 +34,7 @@ describe('mapAnswers', () => {
 
 describe('buildReturnTo', () => {
   it('path + hash + ?modal=apply', () => {
-    const result = buildReturnTo({ pathname: '/admission-next', hash: '#departments' });
-    assert.strictEqual(result, '/admission-next#departments?modal=apply');
+    const result = buildReturnTo({ pathname: '/admission', hash: '#departments' });
+    assert.strictEqual(result, '/admission#departments?modal=apply');
   });
 });

@@ -113,6 +113,8 @@ function AdmissionPageInner() {
 
   return (
     <div className="adm-v3-dark">
+      {/* 접근성 건너뛰기 링크 (원본 1619) */}
+      <a href="#intro" className="skip-link">본문 바로가기</a>
       {/* Intro — always mounted; hidden via display:none when a view is open */}
       <main id="intro" style={{ display: view === null ? '' : 'none' }}>
         <IntroView onShowView={showView} onApply={openApply} onBack={showIntro} />

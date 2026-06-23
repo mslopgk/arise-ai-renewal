@@ -34,7 +34,8 @@ export default function App() {
       <Route path="/scholarship" element={<ScholarshipCheck />} />
 
       {/* admission — lazy-loaded; CSS는 별도 청크(.adm-v3-dark 스코프, 전역 누출 차단) */}
-      <Route path="/admission" element={<Suspense fallback={null}><AdmissionPage /></Suspense>} />
+      {/* 청크 로드 중 라이트 body 노출(화이트 플래시) 방지용 다크 폴백 — admission --bg(#08080A) 동일 */}
+      <Route path="/admission" element={<Suspense fallback={<div style={{ position: 'fixed', inset: 0, background: '#08080A' }} />}><AdmissionPage /></Suspense>} />
 
       {/* Admin */}
       <Route path="/admin/login" element={<AdminLogin />} />
