@@ -325,7 +325,7 @@ export default function DepartmentsView({ onBack, isOpen }) {
                   <div className="cas-col-head">
                     <span className="cas-col-label">학과</span>
                     <span className="cas-col-sub" id="casColSub2">
-                      {(deptCount > 0 && (st.gye || st.q.trim())) ? `${deptCount}개` : ''}
+                      {(departments.length > 0 && (st.gye || st.q.trim())) ? `${deptCount}개` : ''}
                     </span>
                   </div>
                   <DeptCol

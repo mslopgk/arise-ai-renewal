@@ -12,7 +12,7 @@ function PicksList({ picks, onRemove, onGotoDept }) {
   const rank = ['1지망', '2지망', '3지망'];
   if (!picks.length) {
     return (
-      <div className="picks-list">
+      <div className="picks-list" id="picksList">
         <div className="picks-empty">
           위에서 학과를 선택하거나{' '}
           <a href="#" onClick={(e) => { e.preventDefault(); onGotoDept(); }}>
@@ -24,7 +24,7 @@ function PicksList({ picks, onRemove, onGotoDept }) {
     );
   }
   return (
-    <div className="picks-list">
+    <div className="picks-list" id="picksList">
       {picks.map((p, i) => (
         <div className="pick-item" key={i}>
           <span className="pick-rank">{i + 1}</span>
@@ -169,7 +169,7 @@ export default function ApplyModal({ open, onClose, departments, onSubmitted, sh
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
     const fd = new FormData(e.target);
-    const agreeEl = e.target.querySelector('#applyAgree');
+    const agreeEl = e.target.querySelector('#agree');
     if (!agreeEl || !agreeEl.checked) {
       showToast('⚠ 이메일 수집·이용 동의가 필요합니다.');
       return;
@@ -288,22 +288,24 @@ export default function ApplyModal({ open, onClose, departments, onSubmitted, sh
                 ))}
               </select>
 
-              {/* Major select (mirrors renderPickMajorSelect ~3111-3126) */}
-              {showMajorSelect && (
-                <select
-                  id="pickMajorSelect"
-                  aria-label="전공 선택"
-                  value={majorVal}
-                  onChange={handleMajorChange}
-                >
-                  <option value="">
-                    {majorOptional ? '전공(학과 단위로 담기)' : '전공을 선택하세요'}
-                  </option>
-                  {majors.map((m) => (
-                    <option key={m.name} value={m.name}>{m.name}</option>
-                  ))}
-                </select>
-              )}
+              {/* Major select (mirrors renderPickMajorSelect ~3111-3126) —
+                  always in DOM; hidden/disabled toggled like the original so the
+                  CSS sibling rule #pickMajorSelect:not([hidden]) ~ .pick-add-btn holds */}
+              <select
+                id="pickMajorSelect"
+                aria-label="전공 선택"
+                hidden={!showMajorSelect}
+                disabled={!showMajorSelect}
+                value={majorVal}
+                onChange={handleMajorChange}
+              >
+                <option value="">
+                  {majorOptional ? '전공(학과 단위로 담기)' : '전공을 선택하세요'}
+                </option>
+                {majors.map((m) => (
+                  <option key={m.name} value={m.name}>{m.name}</option>
+                ))}
+              </select>
 
               <button
                 type="button"
@@ -313,15 +315,15 @@ export default function ApplyModal({ open, onClose, departments, onSubmitted, sh
                 onClick={addPick}
               >지망 추가</button>
 
-              {/* Hint (mirrors updatePickAddState hint ~3142-3146) */}
-              {hintText && (
-                <p
-                  className={`pick-picker-hint${hintWarn ? ' warn' : ''}`}
-                  id="pickPickerHint"
-                >
-                  {hintText}
-                </p>
-              )}
+              {/* Hint (mirrors updatePickAddState hint ~3142-3146) —
+                  always in DOM, hidden toggled like the original */}
+              <p
+                className={`pick-picker-hint${hintWarn ? ' warn' : ''}`}
+                id="pickPickerHint"
+                hidden={!hintText}
+              >
+                {hintText}
+              </p>
             </div>
 
             <PicksList
@@ -353,9 +355,9 @@ export default function ApplyModal({ open, onClose, departments, onSubmitted, sh
           </div>
 
           <div className="checkbox-row">
-            <input type="checkbox" id="applyAgree" required />
+            <input type="checkbox" id="agree" required />
             <label
-              htmlFor="applyAgree"
+              htmlFor="agree"
               style={{ margin: 0, fontWeight: 500, fontFamily: 'var(--font-sans)', letterSpacing: 0, textTransform: 'none' }}
             >
               로그인 계정 이메일 수집·이용에 동의합니다. (이름·사진은 저장하지 않습니다)

@@ -218,6 +218,7 @@ export default function DeptDetailModal({ dept, major, onClose }) {
   return (
     <div
       className="casm-modal"
+      id="casmModal"
       role="dialog"
       aria-modal="true"
       aria-labelledby="casmTitle"
