@@ -264,42 +264,25 @@ export default function DepartmentsView({ onBack, isOpen }) {
     <section
       className={`view${isOpen ? ' is-open' : ''}`}
       id="view-departments"
-      aria-label="학과 디렉터리"
+      aria-label="Department Directory"
     >
-      <div className="view-scroll edx">
-        <div className="ed-stage">
+      <div className="view-bar">
+        <button type="button" className="view-back" onClick={onBack}>← 메뉴</button>
+        <span className="view-kicker">Department Directory</span>
+      </div>
+      <div className="view-scroll">
+        <div className="container">
 
-          <div className="wrap">
-            <header className="mast rise d1">
-              <div className="mast-top">
-                <button type="button" className="brand" onClick={onBack} aria-label="목차로 돌아가기">
-                  <div className="mark"><img src="/logos/pnu-symbol-color.jpg" alt="부산대학교" /></div>
-                  <div className="bt"><strong>학·석사 연계과정</strong><small>ARISE PNU AI · UGLINK</small></div>
-                </button>
-                <div className="mast-right">
-                  <span className="mast-meta">2026학년도 2학기</span>
-                </div>
-              </div>
-              <div className="crumb">
-                <button type="button" className="back view-back" onClick={onBack}>← 목차</button>
-                <span className="sep">/</span><span>Section 04</span>
-                <span className="sep">/</span><span className="here">학과 디렉터리</span>
-                <span className="idx">Departments</span>
-              </div>
-            </header>
-          </div>
+          <h2 className="view-title">어떤 학과가 있는가</h2>
+          <p className="view-desc">계열 → 학과 → 세부전공 순으로 탐색해 보세요.</p>
 
-          <div className="wrap">
-            <h2 className="view-title">어떤 학과가 있는가</h2>
-            <p className="view-desc">계열 → 학과 → 세부전공 순으로 탐색해 보세요.</p>
-
-            <div className="view-hero">
-              <img src="/media/gen/dept-hero.png" alt="" aria-hidden="true" />
-              <div className="view-hero-cap">
-                <strong>계열에서 <em>학과</em>로, 학과에서 <em>전공</em>으로.</strong>
-                <span>왼쪽 컬럼부터 차례로 눌러 탐색하세요. 학과를 클릭하면 상세 정보가 팝업으로 열립니다.</span>
-              </div>
+          <div className="view-hero">
+            <img src="/media/gen/dept-hero.png" alt="" aria-hidden="true" />
+            <div className="view-hero-cap">
+              <strong>계열에서 <em>학과</em>로, 학과에서 <em>전공</em>으로.</strong>
+              <span>왼쪽 컬럼부터 차례로 눌러 탐색하세요. 학과를 클릭하면 상세 정보가 팝업으로 열립니다.</span>
             </div>
+          </div>
 
             <div id="deptViewRoot">
               {/* 검색 + BK21 토글 (mirror .cas-bar ~2467-2473) */}
@@ -376,7 +359,6 @@ export default function DepartmentsView({ onBack, isOpen }) {
                 학과를 클릭하면 상세 정보가 팝업으로 열립니다. 전공이 여럿인 학과는 세부전공까지 선택하세요.
               </p>
             </div>
-          </div>
 
         </div>
       </div>
