@@ -5,6 +5,9 @@
 
 라이브: **https://arise-ai.pusan.ac.kr**
 
+> 📦 **이 저장소(arise-ai-renewal)는 정적 HTML을 React SPA로 전면 통합한 버전입니다.**
+> 무엇이 어떻게 바뀌었는지는 [`MIGRATION.md`](./MIGRATION.md) 참고. (원본 프로덕션: `arise-pnu-ai`)
+
 ---
 
 ## 주요 기능
