@@ -6,7 +6,9 @@ import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { join, extname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { existsSync } from 'node:fs';
 import puppeteer from 'puppeteer-core';
+import { resolveChromePath, DEFAULT_CHROME_CANDIDATES } from '../scripts/lib/chrome-path.mjs';
 
 const __dirname = resolve(fileURLToPath(import.meta.url), '..');
 const DIST = resolve(__dirname, '..', 'dist');
@@ -34,9 +36,9 @@ before(async () => {
   });
   await new Promise(r => server.listen(0, r));
   base = `http://127.0.0.1:${server.address().port}`;
-  // CHROME_PATH 환경변수로 크롬 실행파일 지정(폐쇄망/Windows 대응)
+  // PUPPETEER_EXECUTABLE_PATH/CHROME_PATH override + 기본 설치경로 자동탐색(parity-check와 동일 헬퍼)
   browser = await puppeteer.launch({
-    executablePath: process.env.CHROME_PATH,
+    executablePath: resolveChromePath(process.env, DEFAULT_CHROME_CANDIDATES, existsSync),
     headless: 'new', args: ['--no-sandbox'],
   });
 });
