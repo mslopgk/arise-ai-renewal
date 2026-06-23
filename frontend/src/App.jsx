@@ -4,11 +4,11 @@ import { lazy, Suspense } from 'react';
 const AdmissionPage = lazy(() => import('./routes/admission/AdmissionPage.jsx'));
 
 // Pages & Auth
-import Gateway from './pages/Gateway.jsx';
-import Login from './pages/Login.jsx';
-import AdminLogin from './pages/AdminLogin.jsx';
-import AdminDashboard from './pages/AdminDashboard.jsx';
-import DeptEditRequest from './pages/DeptEditRequest.jsx';
+import Gateway from './routes/Gateway.jsx';
+import Login from './routes/Login.jsx';
+import AdminLogin from './routes/admin/AdminLogin.jsx';
+import AdminDashboard from './routes/admin/AdminDashboard.jsx';
+import DeptEditRequest from './routes/DeptEditRequest.jsx';
 
 // 계산기 2종 (Task 2.4 — 실제 컴포넌트로 교체)
 import EligibilityCheck from './routes/EligibilityCheck.jsx';
