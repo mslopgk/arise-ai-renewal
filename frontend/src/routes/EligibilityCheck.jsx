@@ -277,23 +277,22 @@ export default function EligibilityCheck() {
                         <span className={`ico ${c.state}`}>{icon}</span>
                         <div>
                           <div className="ctitle">{c.title}</div>
-                          <div className="cdetail">
-                            <span dangerouslySetInnerHTML={{ __html: c.detail }} />
-                            {c.state !== 'ok' && (
-                              <div
-                                className={`reason ${rcls}`}
-                                dangerouslySetInnerHTML={{ __html: (c.state === 'no' ? '⚠ ' : '• ') + c.reason }}
-                              />
-                            )}
-                          </div>
+                          <div
+                            className="cdetail"
+                            dangerouslySetInnerHTML={{
+                              __html:
+                                c.detail +
+                                (c.state === 'ok'
+                                  ? ''
+                                  : `<div class="reason ${rcls}">${c.state === 'no' ? '⚠ ' : '• '}${c.reason}</div>`),
+                            }}
+                          />
                         </div>
                       </li>
                     );
                   })}
                 </ul>
-                {result.scholNote && (
-                  <div id="scholNote" dangerouslySetInnerHTML={{ __html: result.scholNote }} />
-                )}
+                <div id="scholNote" dangerouslySetInnerHTML={{ __html: result.scholNote || '' }} />
                 <div className="reco-note">참고 · <b>지원 자격 3번</b>(소속 학과(부)장 또는 지도교수 추천)은 자가진단으로 확인할 수 없습니다. 위 항목을 충족하더라도 <b>추천 절차는 별도로 진행</b>해야 최종 지원이 가능합니다.</div>
               </div>
               {/* 상담 (추후/불가 시) */}
