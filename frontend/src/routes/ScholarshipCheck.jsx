@@ -205,7 +205,7 @@ export default function ScholarshipCheck() {
         {/* footer (원본 158-161) — /eligibility.html → <Link to="/eligibility"> */}
         <footer>
           <Link to="/eligibility">지원 자격 확인하기</Link> ·
-          <a href="/admission-v3-dark.html">← 연계과정 안내로</a>
+          <Link to="/admission">← 연계과정 안내로</Link>
         </footer>
       </div>
     </div>

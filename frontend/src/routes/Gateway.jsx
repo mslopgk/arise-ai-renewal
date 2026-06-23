@@ -92,14 +92,14 @@ export default function Gateway() {
               </Link>
             </li>
 
-            {/* Menu 3: Application process (Direct static page routing) */}
+            {/* Menu 3: 학·석사 연계과정 신청 (SPA 내부 라우트) */}
             <li>
-              <a className="gateway-btn apply" href="/admission-v3-dark.html">
+              <Link className="gateway-btn apply" to="/admission">
                 <span className="num">03</span>
                 <strong>학·석사 연계과정 신청</strong>
                 <span className="desc">대학원 연계과정 안내 · 학과 디렉터리 · 사전 신청</span>
                 <span className="btn-arrow"><span className="arrow-icon"></span></span>
-              </a>
+              </Link>
             </li>
           </ul>
         </div>

@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 export function EligibilityView({ onShowView, onApply, onBack, isOpen }) {
   return (
     <section className={`view${isOpen ? ' is-open' : ''}`} id="view-eligibility" aria-label="Eligibility">
@@ -37,7 +39,7 @@ export function EligibilityView({ onShowView, onApply, onBack, isOpen }) {
                 <h4>자격 자가진단</h4>
                 이수 학기·평점·학점 기준을 입력하면 지원 가능 여부를 1분 만에 확인할 수 있습니다.
                 <div style={{ marginTop: '16px' }}>
-                  <a className="apply" href="/eligibility.html">내 지원 자격 확인하기 →</a>
+                  <Link className="apply" to="/eligibility">내 지원 자격 확인하기 →</Link>
                 </div>
               </div>
             </section>
@@ -121,7 +123,7 @@ export function EligibilityView({ onShowView, onApply, onBack, isOpen }) {
               <p>2026.7.9~7.16 원서접수 · 무시험 특별전형</p>
               <div className="row">
                 <button type="button" className="apply" onClick={() => onShowView('departments')}>학과 디렉터리 <span className="a">→</span></button>
-                <a className="apply ghostbtn" href="/eligibility.html">내 지원 자격 확인하기</a>
+                <Link className="apply ghostbtn" to="/eligibility">내 지원 자격 확인하기</Link>
               </div>
             </div>
           </div>

@@ -311,7 +311,7 @@ export default function EligibilityCheck() {
               </div>
               {/* 다음 단계 (가능 시) */}
               <div className={`next${result.tier !== 'pass' ? ' hidden' : ''}`} id="nextBox">
-                <a href="/admission-v3-dark.html">→ 연계과정 안내 · 희망 제출하러 가기</a>
+                <Link to="/admission">→ 연계과정 안내 · 희망 제출하러 가기</Link>
               </div>
             </>
           )}
@@ -324,7 +324,7 @@ export default function EligibilityCheck() {
 
         <footer>
           <Link to="/scholarship">장학금 해당 여부 확인하기</Link> ·
-          {' '}<a href="/admission-v3-dark.html">← 연계과정 안내로 돌아가기</a>
+          {' '}<Link to="/admission">← 연계과정 안내로 돌아가기</Link>
         </footer>
       </div>
     </div>

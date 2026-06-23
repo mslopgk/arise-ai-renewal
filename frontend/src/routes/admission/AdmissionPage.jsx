@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import './admission-v3-dark.css';
 import { useHashView } from '../../hooks/useHashView';
 import { useFxDecorations } from '../../hooks/useFxDecorations';
@@ -158,13 +159,13 @@ function AdmissionPageInner() {
       <div className="toast" id="toast" ref={toastRef}></div>
 
       {/* 수정신청 FAB (원본 3450-3456) */}
-      <a className="dr-fab" href="/dept-edit-request" aria-label="학과 정보 수정 신청 페이지로 이동">
+      <Link className="dr-fab" to="/dept-edit-request" aria-label="학과 정보 수정 신청 페이지로 이동">
         <svg className="dr-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M12 20h9" />
           <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
         </svg>
         <span>학과 정보 수정 신청</span>
-      </a>
+      </Link>
 
       {/* 피드백 FAB (원본 3503-3510) */}
       <a

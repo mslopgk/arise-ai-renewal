@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 export default function BenefitsView({ onShowView, onApply, onBack, isOpen }) {
   return (
     <section className={`view${isOpen ? ' is-open' : ''}`} id="view-benefits" aria-label="Benefits & Scholarships">
@@ -140,7 +142,7 @@ export default function BenefitsView({ onShowView, onApply, onBack, isOpen }) {
               <h2>내 장학, <em>해당될까?</em> 먼저 확인해 보세요.</h2>
               <p>등록금 100% · 진흥 50만 · BK21 70만×4 · 연구지원 50만</p>
               <div className="row">
-                <a className="apply" href="/scholarship.html">내 장학 해당 여부 확인 →</a>
+                <Link className="apply" to="/scholarship">내 장학 해당 여부 확인 →</Link>
                 <button type="button" className="apply ghostbtn" onClick={() => onShowView('eligibility')}>자격요건 다시 보기</button>
               </div>
             </div>
